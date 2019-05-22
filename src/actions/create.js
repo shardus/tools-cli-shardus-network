@@ -72,8 +72,8 @@ const questions = [
         when: (answers) => answers.startSeedNodeServer
     },
     {   // If not running seed node server locally, asks for ints address and port
-        default: defaultNetwork.seedNoodeServerAddr,
-        name: 'seedNoodeServerAddr',
+        default: defaultNetwork.seedNodeServerAddr,
+        name: 'seedNodeServerAddr',
         message: 'What\'s the seed-node-server address ?',
         validate: notNull,
         when: (answers) => !answers.startSeedNodeServer

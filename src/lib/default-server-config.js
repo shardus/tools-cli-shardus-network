@@ -16,7 +16,7 @@ module.exports = {
             externalIp: "127.0.0.1",
             externalPort: 9001,
             internalIp: "127.0.0.1",
-            internalPort: 9100
+            internalPort: 10000
         },
         loadDetection: {
             queueLimit: 1000,
