@@ -1,5 +1,6 @@
 const defaultNetworkConfig = require('./default-network-config.js')
 const defaultServerConfig = require('./default-server-config')
+const path = require('path')
 const shell = require('shelljs')
 const _ = require('lodash')
 
@@ -8,6 +9,7 @@ module.exports = (configs) => {
         ...defaultNetworkConfig,
         ...configs
     }
+    networkConfig.serverPath = path.resolve(networkConfig.serverPath)
     shell.mkdir(networkConfig.instancesPath)
     shell.cd(networkConfig.instancesPath)
     let serverConfig = _.cloneDeep(defaultServerConfig)
@@ -22,5 +24,4 @@ module.exports = (configs) => {
         shell.ShellString(JSON.stringify(nodeConfig)).to(`shardus-instance-${nodeConfig.server.ip.externalPort}/config.json`)
     }
     shell.ShellString(JSON.stringify(networkConfig)).to(`network-config.json`)
-    console.log()
 }

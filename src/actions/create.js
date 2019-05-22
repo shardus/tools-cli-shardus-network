@@ -19,10 +19,20 @@ let config
 
 const questions = [
     {
+        name: 'serverPath',
+        default: defaultNetwork.serverPath,
+        message: 'Choose the main server file path',
+        validate: (input, answers) => {
+            if (input === '') return `Server file path cannot be null`
+            if (!fs.existsSync(path.resolve(input))) return `Cannot find ${path.resolve(input)}`
+            else return true
+        }
+    },     
+    {
         default: defaultNetwork.instancesPath,
         name: 'instancesPath',
         message: 'What name should be the folder to be created for the network instances ?',
-        transformer: input =>  path.resolve(input),
+        // transformer: input =>  path.resolve(input),
         validate: (input, answers) => {
             if (input === '') return `Cannot create a directory without a name`
             if (fs.existsSync(path.resolve(input))) return `Cannot create directory ${input}, already exists`
@@ -52,7 +62,7 @@ const questions = [
             if (isNaN(input)) return 'Value must be a number'
             let extPort = answers['startingExternalPort']
             let num = answers['numberOfNodes'] 
-            if ((input <= extPort & input + num > extPort) | (input >= extPort & extPort + num > input)) {
+            if ((input <= extPort & input + num > extPort) || (input >= extPort & extPort + num > input)) {
                 return `External port value will overlap internal port, please select a value <= ${extPort - num} or >= ${extPort + num}`
             } else return true
         }
@@ -114,13 +124,6 @@ const questions = [
         when: (answers) => !answers.startMonitorServer
     }               
 ]
-
-const confirm = {
-    type: 'confirm',
-    message: `Do you confirm the creation of the network with the following configurations ?\n${config}`,
-    name: 'confirm',
-    default: true
-}
 
 module.exports = (args, options, logger) => {
     if (options['default']) create()

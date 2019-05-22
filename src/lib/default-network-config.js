@@ -1,5 +1,6 @@
 module.exports = {
     'numberOfNodes': 10,
+    'serverPath': 'index.js',
     'startingExternalPort': 9001,
     'startingInternalPort': 10001,
     'instancesPath': 'instances',
