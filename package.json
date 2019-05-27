@@ -6,6 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "bin": {
+    "shardus-network": "./bin/index.js"
+  },
   "author": "Erik Xavier",
   "license": "MIT",
   "dependencies": {
@@ -13,7 +16,9 @@
     "execa": "^1.0.0",
     "inquirer": "^6.3.1",
     "lodash": "^4.17.11",
+    "monitor-server": "gitlab:shardus/enterprise%2Fmonitor-server#port-argument",
     "pm2": "^3.5.0",
+    "seed-node-server": "gitlab:shardus/enterprise%2Fseed-node-server#port-argument",
     "shelljs": "^0.8.3"
   }
 }
