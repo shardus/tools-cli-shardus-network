@@ -22,7 +22,7 @@
     "lodash": "^4.17.11",
     "monitor-server": "git+https:gitlab.com/shardus/enterprise/monitor-server#port-argument",
     "pm2": "^3.5.0",
-    "seed-node-server": "git+https:gitlab.com/shardus/enterprise/seed-node-server#port-argument",
+    "seed-node-server": "git+https:gitlab.com/shardus/enterprise/seed-node-server#rewrite",
     "shelljs": "^0.8.3"
   }
 }
