@@ -20,7 +20,7 @@
     "execa": "^1.0.0",
     "inquirer": "^6.3.1",
     "lodash": "^4.17.11",
-    "monitor-server": "git+https:gitlab.com/shardus/enterprise/monitor-server#port-argument",
+    "monitor-server": "git+https:gitlab.com/shardus/enterprise/monitor-server",
     "pm2": "^3.5.0",
     "seed-node-server": "git+https:gitlab.com/shardus/enterprise/seed-node-server",
     "shelljs": "^0.8.3"
