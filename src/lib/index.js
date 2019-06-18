@@ -4,5 +4,6 @@ module.exports = {
     networkStop: require('./network-stop'),
     networkReset: require('./network-reset'),
     networkDel: require('./network-del'),
-    networkList: require('./network-list')
+    networkList: require('./network-list'),
+    networkPm2: require('./network-pm2')
 }
