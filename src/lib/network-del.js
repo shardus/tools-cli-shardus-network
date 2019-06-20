@@ -1,5 +1,5 @@
 const util = require('./util')
 
-module.exports = async (reference, instancesPath) => {
-    util.pm2Del(reference, instancesPath)
+module.exports = async (reference) => {
+    util.pm2Del(reference)
 }

@@ -4,6 +4,5 @@ module.exports = {
     stop: require('./stop'),
     reset: require('./reset'),
     del: require('./del'),
-    list: require('./list'),
-    pm2: require('./pm2')
+    list: require('./list')
 }
