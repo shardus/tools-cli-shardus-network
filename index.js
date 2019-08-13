@@ -1,4 +1,4 @@
 module.exports = {
-    Actions: require('./src/cli-actions'),
-    ...require('./src/lib')
+  register: require('./src/commands'),
+  lib: require('./src/lib')
 }

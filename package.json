@@ -1,7 +1,7 @@
 {
   "name": "shardus-network",
   "version": "1.0.0",
-  "description": "Tool designed for managing a shardus network",
+  "description": "Tool for managing a Shardus test network",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -24,5 +24,8 @@
     "pm2": "^3.5.0",
     "seed-node-server": "git+https:gitlab.com/shardus/enterprise/seed-node-server",
     "shelljs": "^0.8.3"
+  },
+  "devDependencies": {
+    "standard": "^13.1.0"
   }
 }
