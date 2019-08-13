@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const prog = require('caporal')
 const register = require('../src/commands')
 
