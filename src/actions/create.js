@@ -123,7 +123,7 @@ const questions = [
 ]
 
 module.exports = function (args, options, logger) {
-  if (options['y']) {
+  if (options['default']) {
     create()
   } else {
     inquirer.prompt(questions).then(answers => {

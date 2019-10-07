@@ -4,7 +4,7 @@ const register = {
   create (prog, namespace) {
     prog
       .command(`${namespace ? namespace + ' ' : ''}create`, 'Create a new test network')
-      .option('-y', 'Use default values for the test networks network-config.json')
+      .option('--default', 'Use default values for the test networks network-config.json')
       .action(actions.create)
   },
   start (prog, namespace) {
