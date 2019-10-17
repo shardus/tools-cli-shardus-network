@@ -41,6 +41,15 @@ const register = {
         'Clean the state of all instances in a test net'
       )
       .action(actions.clean)
+  },
+  pm2 (prog, namespace) {
+    prog
+      .command(
+        `${namespace ? namespace + ' ' : ''}pm2`,
+        'Run a pm2 command in the test net dir'
+      )
+      .argument('[commands...]', 'pm2 commands to run')
+      .action(actions.pm2)
   }
 }
 

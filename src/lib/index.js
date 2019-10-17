@@ -3,5 +3,6 @@ module.exports = {
   start: require('./start'),
   scale: require('./scale'),
   stop: require('./stop'),
-  clean: require('./clean')
+  clean: require('./clean'),
+  pm2: require('./pm2')
 }

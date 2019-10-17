@@ -4,34 +4,41 @@ const path = require('path')
 const { version } = require('../../package.json')
 const PM2_HOME = path.join(process.cwd(), '.pm2/')
 
+const pm2 = path.join(__dirname, '../../node_modules/.bin/pm2')
+
 const pm2Start = async (script, name, env = {}) => {
   env.PM2_HOME = PM2_HOME
-  await execa('pm2', ['start', script, `--name=${name}`], { env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} start ${script} --name="${name}" --no-autorestart`, { env, stdio: [0, 1, 2] })
 }
 
 const pm2Stop = async (arg, env = {}) => {
   env.PM2_HOME = PM2_HOME
-  await execa('pm2', ['stop', arg], { env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} stop ${arg}`, { env, stdio: [0, 1, 2] })
 }
 
 const pm2Kill = async (env = {}) => {
   env.PM2_HOME = PM2_HOME
-  await execa('pm2', ['kill'], { env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} kill`, { env, stdio: [0, 1, 2] })
 }
 
 const pm2Reset = async (arg, env = {}) => {
   env.PM2_HOME = PM2_HOME
-  await execa('pm2', ['reset', arg], { env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} reset ${arg}`, { env, stdio: [0, 1, 2] })
 }
 
 const pm2Del = async (arg, env = {}) => {
   env.PM2_HOME = PM2_HOME
-  await execa('pm2', ['del', arg], { env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} del ${arg}`, { env, stdio: [0, 1, 2] })
 }
 
 const pm2List = async (env = {}) => {
   env.PM2_HOME = PM2_HOME
-  await execa('pm2', ['list'], { env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} list`, { env, stdio: [0, 1, 2] })
+}
+
+const pm2Exec = async (arg, env = {}) => {
+  env.PM2_HOME = PM2_HOME
+  await execa.command(`${pm2} ${arg}`, { env, stdio: [0, 1, 2] })
 }
 
 const checkNetworkFolder = (networkPath) => {
@@ -49,4 +56,4 @@ const checkNetworkFolder = (networkPath) => {
   return true
 }
 
-module.exports = { pm2Start, pm2Stop, pm2Kill, pm2Reset, pm2Del, pm2List, checkNetworkFolder }
+module.exports = { pm2Start, pm2Stop, pm2Kill, pm2Reset, pm2Del, pm2List, pm2Exec, checkNetworkFolder }
