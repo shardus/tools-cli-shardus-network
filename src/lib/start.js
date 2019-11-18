@@ -8,10 +8,10 @@ module.exports = async function () {
   const configPath = path.join(instancesPath, 'network-config.json')
   const networkConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
   if (networkConfig.startSeedNodeServer) {
-    await util.pm2Start(require.resolve('seed-node-server'), 'Seed-node-server', { PORT: networkConfig.seedNodeServerPort, TIME_INTERVAL: 5 })
+    await util.pm2Start(require.resolve('archive-server'), 'archive-server', { ARCHIVER_PORT: networkConfig.seedNodeServerPort })
   }
   if (networkConfig.startMonitorServer) {
-    await util.pm2Start(require.resolve('monitor-server'), 'Monitor-server', { PORT: networkConfig.monitorServerPort })
+    await util.pm2Start(require.resolve('monitor-server'), 'monitor-server', { PORT: networkConfig.monitorServerPort })
   }
   const instances = shell.ls('-d', `${instancesPath}/shardus-instance*`)
   for (let i = 0; i < instances.length; i++) {

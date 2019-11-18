@@ -68,27 +68,27 @@ const questions = [
     default: defaultNetwork.startSeedNodeServer,
     name: 'startSeedNodeServer',
     type: 'confirm',
-    message: 'Do you want to run a seed-node-server instance locally ?',
+    message: 'Do you want to run a archive-server instance locally ?',
     validate: notNull
   },
   { // If yes, just ask in wich port it'll run
     default: defaultNetwork.seedNodeServerPort,
     name: 'seedNodeServerPort',
-    message: 'Wich port do you want to run the seed-node-server ?',
+    message: 'Wich port do you want to run the archive-server ?',
     validate: isNumber,
     when: (answers) => answers.startSeedNodeServer
   },
   { // If not running seed node server locally, asks for ints address and port
     default: defaultNetwork.seedNodeServerAddr,
     name: 'seedNodeServerAddr',
-    message: 'What\'s the seed-node-server address ?',
+    message: 'What\'s the archive-server address ?',
     validate: notNull,
     when: (answers) => !answers.startSeedNodeServer
   },
   {
     default: defaultNetwork.seedNodeServerPort,
     name: 'seedNodeServerPort',
-    message: 'What\'s the seed-node-server port ?',
+    message: 'What\'s the archive-server port ?',
     validate: isNumber,
     when: (answers) => !answers.startSeedNodeServer
   },
@@ -109,14 +109,14 @@ const questions = [
   { // If not running seed node server locally, asks for ints address and port
     default: defaultNetwork.monitorServerAddr,
     name: 'monitorServerAddr',
-    message: 'What\'s the seed-node-server address ?',
+    message: 'What\'s the archive-server address ?',
     validate: notNull,
     when: (answers) => !answers.startMonitorServer
   },
   {
     default: defaultNetwork.monitorServerPort,
     name: 'monitorServerPort',
-    message: 'What\'s the seed-node-server port ?',
+    message: 'What\'s the archive-server port ?',
     validate: isNumber,
     when: (answers) => !answers.startMonitorServer
   }

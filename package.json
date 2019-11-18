@@ -16,13 +16,13 @@
   "author": "Erik Xavier",
   "license": "MIT",
   "dependencies": {
+    "archive-server": "git+https://gitlab.com/shardus/archive/archive-server.git",
     "caporal": "^1.3.0",
     "execa": "^1.0.0",
     "inquirer": "^6.3.1",
     "lodash": "^4.17.15",
     "monitor-server": "git+https:gitlab.com/shardus/monitor-server",
     "pm2": "^4.1.2",
-    "seed-node-server": "git+https:gitlab.com/shardus/seed-node-server",
     "shelljs": "^0.8.3"
   },
   "devDependencies": {
