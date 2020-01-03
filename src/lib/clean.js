@@ -17,4 +17,7 @@ module.exports = async function () {
   // Delete './pm2'
   shell.rm('-rf', path.join(instancesPath, '.pm2'))
   console.log(`Cleaned ./pm2`)
+  // Delete './archiver-db.sqlite'
+  shell.rm('-rf', path.join(instancesPath, 'archiver-db.sqlite'))
+  console.log(`Cleaned ./archiver-db.sqlite`)
 }
