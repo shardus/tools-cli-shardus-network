@@ -7,8 +7,17 @@ module.exports = async function (autorestart, pm2Args) {
   const instancesPath = path.join(process.cwd())
   const configPath = path.join(instancesPath, 'network-config.json')
   const networkConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
-  if (pm2Args.length < 1 && autorestart === false) {
-    pm2Args = ['pm2--no-autorestart']
+  if (autorestart === false) {
+    // Ensure '--no-autorestart' is passed to PM2
+    if (pm2Args.includes('pm2--no-autorestart') === false) {
+      pm2Args.push('pm2--no-autorestart')
+    }
+  } else {
+    // Ensure '--no-autorestart' is NOT passed to PM2
+    const idx = pm2Args.indexOf('pm2--no-autorestart')
+    if (idx > -1) {
+      pm2Args.splice(idx, 1)
+    }
   }
   if (networkConfig.startSeedNodeServer) {
     await util.pm2Start(require.resolve('archive-server', { paths: [process.cwd()] }), 'archive-server', { ARCHIVER_PORT: networkConfig.seedNodeServerPort }, pm2Args)
