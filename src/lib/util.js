@@ -6,9 +6,12 @@ const PM2_HOME = path.join(process.cwd(), '.pm2/')
 
 const pm2 = path.join(__dirname, '../../node_modules/.bin/pm2')
 
-const pm2Start = async (script, name, env = {}) => {
+const pm2Start = async (script, name, env = {}, pm2Args = []) => {
   env.PM2_HOME = PM2_HOME
-  await execa.command(`${pm2} start ${script} --name="${name}" --no-autorestart`, { env, stdio: [0, 1, 2] })
+  const parsedPm2Args = pm2Args.map(arg => arg.split('pm2')[1] || arg).join(' ')
+  const execaCmd = `${pm2} start ${script} --name="${name}" ${parsedPm2Args}`
+  console.log('pm2Start', execaCmd)
+  await execa.command(execaCmd, { env, stdio: [0, 1, 2] })
 }
 
 const pm2Stop = async (arg, env = {}) => {

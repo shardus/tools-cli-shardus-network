@@ -19,6 +19,8 @@ const register = {
         `${namespace ? namespace + ' ' : ''}start`,
         'Start a test network'
       )
+      .option('--autorestart', 'Autorestarts nodes that have stopped. Ignored if pm2 args are provided')
+      .argument('[pm2...]', 'Additional arguments/flags to pass to PM2. Prefix them with \'pm2\' e.g., \'pm2--no-autorestart\' ')
       .action(actions.start)
   },
   scale (prog, namespace) {
