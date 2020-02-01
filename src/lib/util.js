@@ -4,7 +4,7 @@ const path = require('path')
 const { version } = require('../../package.json')
 const PM2_HOME = path.join(process.cwd(), '.pm2/')
 
-const pm2 = path.join(__dirname, '../../node_modules/.bin/pm2')
+const pm2 = path.join(require.resolve('pm2', { paths: [path.join(__dirname, 'node_modules')] }), '../../.bin/pm2')
 
 const pm2Start = async (script, name, env = {}, pm2Args = []) => {
   env.PM2_HOME = PM2_HOME
