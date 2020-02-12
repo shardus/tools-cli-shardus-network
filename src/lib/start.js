@@ -3,28 +3,28 @@ const fs = require('fs')
 const path = require('path')
 const util = require('./util')
 
-module.exports = async function (autorestart, pm2Args) {
+module.exports = async function (pm2Args) {
   const instancesPath = path.join(process.cwd())
   const configPath = path.join(instancesPath, 'network-config.json')
   const networkConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
-  if (autorestart === false) {
-    // Ensure '--no-autorestart' is passed to PM2
-    if (pm2Args.includes('pm2--no-autorestart') === false) {
-      pm2Args.push('pm2--no-autorestart')
-    }
-  } else {
-    // Ensure '--no-autorestart' is NOT passed to PM2
-    const idx = pm2Args.indexOf('pm2--no-autorestart')
-    if (idx > -1) {
-      pm2Args.splice(idx, 1)
-    }
+
+  // Pass PM2 parameters to not restart a node if it exits with an error code
+  if (pm2Args.includes('pm2--count-exit-errors') === false) {
+    pm2Args.push('pm2--count-exit-errors')
   }
+  if (pm2Args.includes('pm2--max-restarts') === false || pm2Args.includes('pm2--max-restarts=1') === false) {
+    pm2Args.push('pm2--max-restarts=1')
+  }
+
+  // Start archiver and monitor
   if (networkConfig.startSeedNodeServer) {
     await util.pm2Start(require.resolve('archive-server', { paths: [process.cwd()] }), 'archive-server', { ARCHIVER_PORT: networkConfig.seedNodeServerPort }, pm2Args)
   }
   if (networkConfig.startMonitorServer) {
     await util.pm2Start(require.resolve('monitor-server', { paths: [process.cwd()] }), 'monitor-server', { PORT: networkConfig.monitorServerPort }, pm2Args)
   }
+
+  // Run pm2 start in each instance dir
   const instances = shell.ls('-d', `${instancesPath}/shardus-instance*`)
   for (let i = 0; i < instances.length; i++) {
     await util.pm2Start(networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
