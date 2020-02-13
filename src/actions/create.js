@@ -4,6 +4,15 @@ const fs = require('fs')
 const defaultNetwork = require('../configs/default-network-config')
 const path = require('path')
 
+// Try to get serverPath from `main` field of package.json, otherwise use default
+let serverPath
+try {
+  const packageJson = JSON.parse(fs.readFileSync(path.join(process.cwd(), './package.json')))
+  serverPath = packageJson.main
+} catch (err) {
+  serverPath = defaultNetwork.serverPath
+}
+
 const notNull = (input, answers) => {
   if (input === '') return 'Value cannot be empty'
   else return true
@@ -17,7 +26,7 @@ const isNumber = (input, answers) => {
 const questions = [
   {
     name: 'serverPath',
-    default: defaultNetwork.serverPath,
+    default: serverPath,
     message: 'Choose the main server file path',
     validate: (input, answers) => {
       if (input === '') return `Server file path cannot be null`
