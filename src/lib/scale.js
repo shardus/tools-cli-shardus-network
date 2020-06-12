@@ -14,7 +14,9 @@ module.exports = async function (configs) {
   }
   const instancesPath = path.join(process.cwd())
   const configPath = path.join(instancesPath, 'network-config.json')
+  const nextPortPath = path.join(instancesPath, 'next-port.json')
   const startConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+  const nextPortConfig = JSON.parse(fs.readFileSync(nextPortPath, 'utf-8'))
 
   let existingInstances = 0
 
@@ -28,8 +30,8 @@ module.exports = async function (configs) {
 
   for (let i = 0; i < networkConfig.nodesToScaleUp; i++) {
     const nodeConfig = _.cloneDeep(serverConfig)
-    nodeConfig.server.ip.externalPort = networkConfig.startingExternalPort + existingInstances + i
-    nodeConfig.server.ip.internalPort = networkConfig.startingInternalPort + existingInstances + i
+    nodeConfig.server.ip.externalPort = nextPortConfig.externalPort + i
+    nodeConfig.server.ip.internalPort = nextPortConfig.internalPort + i
     shell.mkdir(`shardus-instance-${nodeConfig.server.ip.externalPort}`)
     console.log(
       `Created server instance on folder <shardus-instance-${nodeConfig.server.ip.externalPort}>`
