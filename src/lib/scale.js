@@ -41,6 +41,18 @@ module.exports = async function (configs) {
       .to(`shardus-instance-${nodeConfig.server.ip.externalPort}/config.json`)
   }
 
+  const newPortConfig =  {
+    externalPort:
+    networkConfig.nodesToScaleUp + nextPortConfig.externalPort,
+    internalPort:
+    networkConfig.nodesToScaleUp + nextPortConfig.internalPort
+  }
+  shell.ShellString(JSON.stringify(
+   newPortConfig,
+    null,
+    2
+  )).to(`next-port.json`)
+
   const instances = shell.ls('-d', `${instancesPath}/shardus-instance*`)
   for (let i = existingInstances; i < instances.length; i++) {
     await util.pm2Start(startConfig.serverPath, path.basename(instances[i]), {
