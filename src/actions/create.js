@@ -3,6 +3,7 @@ const inquirer = require('inquirer')
 const fs = require('fs')
 const defaultNetwork = require('../configs/default-network-config')
 const path = require('path')
+const { start } = require('../lib')
 
 // Try to get serverPath from `main` field of package.json, otherwise use default
 let serverPath
@@ -132,11 +133,29 @@ const questions = [
 ]
 
 module.exports = function (args, options, logger) {
-  if (options['default']) {
-    create()
+  console.log("ARGS: ", args)
+  const networkDir = args.networkDir ? path.join(process.cwd(), args.networkDir) : path.join(process.cwd(), 'instances')
+  if (args.num) {
+    create({
+      serverPath: serverPath,
+      instancesPath: networkDir,
+      numberOfNodes: args.num,
+      startingExternalPort: defaultNetwork.startingExternalPort,
+      startingInternalPort: defaultNetwork.startingInternalPort,
+      startSeedNodeServer: defaultNetwork.startSeedNodeServer,
+      seedNodeServerPort: defaultNetwork.seedNodeServerPort,
+      startMonitorServer: defaultNetwork.startMonitorServer,
+      monitorServerPort: defaultNetwork.monitorServerPort
+    })
+    if (!options['noStart']) {
+      start(networkDir, args.num, args.pm2)
+    }
   } else {
     inquirer.prompt(questions).then(answers => {
       create(answers)
+      if (!options['noStart']) {
+        start(networkDir, args.num, args.pm2)
+      }
     })
   }
 }

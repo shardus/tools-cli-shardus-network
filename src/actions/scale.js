@@ -1,3 +1,4 @@
+const path = require('path')
 const { scale } = require('../lib')
 const inquirer = require('inquirer')
 
@@ -18,11 +19,12 @@ const questions = [
 ]
 
 module.exports = function (args, options, logger) {
-  if (options['default']) {
-    scale()
+  const networkDir = args.networkDir ? path.join(process.cwd(), args.networkDir) : path.join(process.cwd(), 'instances')
+  if (args.num) {
+    scale(networkDir, parseInt(args.num))
   } else {
     inquirer.prompt(questions).then(answers => {
-      scale(answers)
+      scale(networkDir, answers.nodesToScaleUp)
     })
   }
 }

@@ -7,12 +7,9 @@ const util = require('./util')
 const { readdirSync } = require('fs')
 const _ = require('lodash')
 
-module.exports = async function (configs) {
-  const networkConfig = {
-    ...defaultNetworkConfig,
-    ...configs
-  }
-  const instancesPath = path.join(process.cwd())
+module.exports = async function (networkDir, num) {
+  shell.cd(networkDir)
+  const instancesPath = networkDir
   const configPath = path.join(instancesPath, 'network-config.json')
   const nextPortPath = path.join(instancesPath, 'next-port.json')
   const startConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
@@ -28,7 +25,7 @@ module.exports = async function (configs) {
 
   const serverConfig = _.cloneDeep(defaultServerConfig)
 
-  for (let i = 0; i < networkConfig.nodesToScaleUp; i++) {
+  for (let i = 0; i < num; i++) {
     const nodeConfig = _.cloneDeep(serverConfig)
     nodeConfig.server.ip.externalPort = nextPortConfig.externalPort + i
     nodeConfig.server.ip.internalPort = nextPortConfig.internalPort + i
@@ -42,10 +39,8 @@ module.exports = async function (configs) {
   }
 
   const newPortConfig =  {
-    externalPort:
-    networkConfig.nodesToScaleUp + nextPortConfig.externalPort,
-    internalPort:
-    networkConfig.nodesToScaleUp + nextPortConfig.internalPort
+    externalPort: num + nextPortConfig.externalPort,
+    internalPort: num + nextPortConfig.internalPort
   }
   shell.ShellString(JSON.stringify(
    newPortConfig,

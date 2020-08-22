@@ -3,7 +3,9 @@ const fs = require('fs')
 const path = require('path')
 const util = require('./util')
 
-module.exports = async function (pm2Args) {
+module.exports = async function (networkDir, num, pm2Args) {
+  console.log(networkDir, num, pm2Args)
+  shell.cd(networkDir)
   const instancesPath = path.join(process.cwd())
   const configPath = path.join(instancesPath, 'network-config.json')
   const networkConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
@@ -16,19 +18,35 @@ module.exports = async function (pm2Args) {
     pm2Args.push('pm2--max-restarts=1')
   }
 
-  // Start archiver and monitor
-  if (networkConfig.startSeedNodeServer) {
-    await util.pm2Start(require.resolve('archive-server', { paths: [process.cwd()] }), 'archive-server', { ARCHIVER_PORT: networkConfig.seedNodeServerPort }, pm2Args)
-  }
-  if (networkConfig.startMonitorServer) {
-    await util.pm2Start(require.resolve('monitor-server', { paths: [process.cwd()] }), 'monitor-server', { PORT: networkConfig.monitorServerPort }, pm2Args)
+  const instances = shell.ls('-d', `${instancesPath}/shardus-instance*`)
+  const nodesToStart = num ? parseInt(num) : instances.length
+
+  try {
+    // Start archiver and monitor
+    if (networkConfig.startSeedNodeServer) {
+      await util.pm2Start(require.resolve('archive-server', { paths: [process.cwd()] }), 'archive-server', { ARCHIVER_PORT: networkConfig.seedNodeServerPort }, pm2Args)
+    }
+    if (networkConfig.startMonitorServer) {
+      await util.pm2Start(require.resolve('monitor-server', { paths: [process.cwd()] }), 'monitor-server', { PORT: networkConfig.monitorServerPort }, pm2Args)
+    }
+  } catch (err) {
+
   }
 
   // Run pm2 start in each instance dir
-  const instances = shell.ls('-d', `${instancesPath}/shardus-instance*`)
-  for (let i = 0; i < instances.length; i++) {
-    await util.pm2Start(networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
-    // if (index === 0) await sleep(2000)
+  try {
+    for (let i = 0; i < nodesToStart; i++) {
+      await util.pm2Start(networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+      // if (index === 0) await sleep(2000)
+    }
+  } catch (err) {
+    for (let i = 2; i < nodesToStart + 2; i++) {
+      try {
+        await util.pm2Start(networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+      } catch (err) {
+
+      }
+    }
   }
   console.log()
   console.log('\x1b[33m%s\x1b[0m', 'View network monitor at:') // Yellow

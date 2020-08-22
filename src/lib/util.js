@@ -1,6 +1,7 @@
 const execa = require('execa')
 const fs = require('fs')
 const path = require('path')
+const shell = require('shelljs')
 const { version } = require('../../package.json')
 const PM2_HOME = path.join(process.cwd(), '.pm2/')
 
@@ -14,14 +15,14 @@ const pm2Start = async (script, name, env = {}, pm2Args = []) => {
   await execa.command(execaCmd, { env, stdio: [0, 1, 2] })
 }
 
-const pm2Stop = async (arg, env = {}) => {
+const pm2Stop = async (networkDir, arg, env = {}) => {
   env.PM2_HOME = PM2_HOME
-  await execa.command(`${pm2} stop ${arg}`, { env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} stop ${arg}`, { cwd: networkDir, env, stdio: [0, 1, 2] })
 }
 
-const pm2Kill = async (env = {}) => {
+const pm2Kill = async (networkDir, env = {}) => {
   env.PM2_HOME = PM2_HOME
-  await execa.command(`${pm2} kill`, { env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} kill`, { cwd: networkDir, env, stdio: [0, 1, 2] })
 }
 
 const pm2Reset = async (arg, env = {}) => {
@@ -34,9 +35,10 @@ const pm2Del = async (arg, env = {}) => {
   await execa.command(`${pm2} del ${arg}`, { env, stdio: [0, 1, 2] })
 }
 
-const pm2List = async (env = {}) => {
+const pm2List = async (networkDir, env = {}) => {
   env.PM2_HOME = PM2_HOME
-  await execa.command(`${pm2} list`, { env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} list`, { cwd: networkDir, env, stdio: [0, 1, 2] })
+  console.log(networkDir)
 }
 
 const pm2Exec = async (arg, env = {}) => {
