@@ -26,16 +26,6 @@ const register = {
       .argument('[pm2...]', 'Additional arguments/flags to pass to PM2. Prefix them with \'pm2\' e.g., \'pm2--no-autorestart\' ')
       .action(actions.start)
   },
-  scale (prog, namespace) {
-    prog
-      .command(
-        `${namespace ? namespace + ' ' : ''}scale-net`,
-        'Scale a test network'
-      )
-      .argument('[num]', 'Number of nodes to create and start in the [network_dir]')
-      .argument('[network_dir]', 'The directory to create and start the nodes from')
-      .action(actions.scale)
-  },
   stop (prog, namespace) {
     prog
       .command(`${namespace ? namespace + ' ' : ''}stop-net`, 'Stop a test network')
@@ -52,6 +42,13 @@ const register = {
       .argument('[num]', 'Number of nodes to clean in the [network_dir]')
       .argument('[network_dir]', 'The directory to clean the nodes from')
       .action(actions.clean)
+  },
+  config (prog, namespace) {
+    prog.command(
+      `${namespace ? namespace + ' ' : ''}config-net`
+    )
+    .argument('[network_dir]', 'The directory to set config.json for all instances')
+    .action(actions.config)
   },
   list (prog, namespace) {
     prog
