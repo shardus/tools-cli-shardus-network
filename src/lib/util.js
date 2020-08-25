@@ -40,9 +40,9 @@ const pm2List = async (networkDir, env = {}) => {
   await execa.command(`${pm2} list`, { cwd: networkDir, env, stdio: [0, 1, 2] })
 }
 
-const pm2Exec = async (arg, env = {}) => {
+const pm2Exec = async (networkDir, arg, env = {}) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
-  await execa.command(`${pm2} ${arg}`, { env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} ${arg}`, { cwd: networkDir, env, stdio: [0, 1, 2] })
 }
 
 const checkNetworkFolder = (networkPath, silent) => {
