@@ -5,37 +5,30 @@ const shell = require('shelljs')
 const _ = require('lodash')
 const { version } = require('../../package.json')
 
-module.exports = function (configs) {
+module.exports = function (networkDir, configs) {
   const networkConfig = {
     ...defaultNetworkConfig,
     ...configs
   }
   networkConfig.serverPath = path.resolve(networkConfig.serverPath)
   networkConfig['shardus-network-version'] = version
-  shell.mkdir(networkConfig.instancesPath)
-  shell.cd(networkConfig.instancesPath)
+  shell.mkdir(networkDir)
+  shell.cd(networkDir)
   const serverConfig = _.cloneDeep(defaultServerConfig)
   serverConfig.server.p2p.seedList = `http://${networkConfig.seedNodeServerAddr}:${networkConfig.seedNodeServerPort}/api/seednodes`
   serverConfig.server.reporting.recipient = `http://${networkConfig.monitorServerAddr}:${networkConfig.monitorServerPort}/api`
+  let highestExternalPort = networkConfig.runningPorts && Math.max(...networkConfig.runningPorts) || networkConfig.startingExternalPort
+  let offset = highestExternalPort > networkConfig.startingExternalPort ? 1 : 0
   for (let i = 0; i < networkConfig.numberOfNodes; i++) {
     const nodeConfig = _.cloneDeep(serverConfig)
-    nodeConfig.server.ip.externalPort = networkConfig.startingExternalPort + i
-    nodeConfig.server.ip.internalPort = networkConfig.startingInternalPort + i
+    nodeConfig.server.ip.externalPort = highestExternalPort + i + offset
+    nodeConfig.server.ip.internalPort = networkConfig.startingInternalPort + i + (highestExternalPort - networkConfig.startingExternalPort) + offset
     shell.mkdir(`shardus-instance-${nodeConfig.server.ip.externalPort}`)
     console.log(`Created server instance on folder <shardus-instance-${nodeConfig.server.ip.externalPort}>`)
     shell.ShellString(JSON.stringify(nodeConfig, null, 2)).to(`shardus-instance-${nodeConfig.server.ip.externalPort}/config.json`)
   }
+  networkConfig.lowestPort = networkConfig.startingExternalPort
+  networkConfig.highestPort = networkConfig.lowestPort + networkConfig.numberOfNodes - 1
+  networkConfig.runningPorts = networkConfig.runningPorts ? networkConfig.runningPorts : []
   shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)
-  const nextPortConfig =  {
-    externalPort:
-      networkConfig.numberOfNodes + networkConfig.startingExternalPort,
-    internalPort:
-      networkConfig.numberOfNodes + networkConfig.startingInternalPort
-  }
-  shell.ShellString(JSON.stringify(
-   nextPortConfig,
-    null,
-    2
-  )).to(`next-port.json`)
-  
 }

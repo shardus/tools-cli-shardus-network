@@ -24,7 +24,7 @@ module.exports = function (args, options, logger) {
     scale(networkDir, parseInt(args.num))
   } else {
     inquirer.prompt(questions).then(answers => {
-      scale(networkDir, answers.nodesToScaleUp)
+      scale(networkDir, parseInt(answers.nodesToScaleUp))
     })
   }
 }

@@ -1,11 +1,27 @@
 const util = require('./util')
-
+const shell = require('shelljs')
+const path = require('path')
+const fs = require('fs')
 module.exports = async function (networkDir, num) {
+  shell.cd(networkDir)
+  const instancesPath = path.join(process.cwd())
+  const configPath = path.join(instancesPath, 'network-config.json')
+  const networkConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+
   if (num) {
-    for (let i = 2; i < parseInt(num) + 2; i++) {
-      util.pm2Stop(networkDir, `${i}`)
-    }
+    //for (let port = networkConfig.lowestPort; port <= networkConfig.highestPort; port++) {
+    networkConfig.runningPorts.forEach(port => {
+      if (num > 0) {
+        util.pm2Stop(networkDir, `"shardus-instance-${port}"`)
+        networkConfig.runningPorts = networkConfig.runningPorts.filter(p => p !== port)
+      }
+      num--
+    })
   } else {
     util.pm2Stop(networkDir, 'all')
+    networkConfig.runningPorts = []
+    networkConfig.startSeedNodeServer = true
+    networkConfig.startMonitorServer = true
   }
+  shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)
 }

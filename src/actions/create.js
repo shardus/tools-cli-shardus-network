@@ -4,6 +4,7 @@ const fs = require('fs')
 const defaultNetwork = require('../configs/default-network-config')
 const path = require('path')
 const { start } = require('../lib')
+const util = require('../lib/util')
 
 // Try to get serverPath from `main` field of package.json, otherwise use default
 let serverPath
@@ -133,13 +134,21 @@ const questions = [
 ]
 
 module.exports = function (args, options, logger) {
-  console.log("ARGS: ", args)
   const networkDir = args.networkDir ? path.join(process.cwd(), args.networkDir) : path.join(process.cwd(), 'instances')
-  if (args.num) {
-    create({
+  if (util.checkNetworkFolder(networkDir, true)) {
+    const configPath = path.join(networkDir, 'network-config.json')
+    const networkConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+    networkConfig.numberOfNodes = args.num ? parseInt(args.num) : 10
+    create(networkDir, networkConfig, args.num, args.pm2)
+    if (!options['noStart']) {
+      start(networkDir, args.num, args.pm2)
+    }
+  }
+  else if (args.num) {
+    create(networkDir, {
       serverPath: serverPath,
       instancesPath: networkDir,
-      numberOfNodes: args.num,
+      numberOfNodes: parseInt(args.num),
       startingExternalPort: defaultNetwork.startingExternalPort,
       startingInternalPort: defaultNetwork.startingInternalPort,
       startSeedNodeServer: defaultNetwork.startSeedNodeServer,
@@ -152,7 +161,7 @@ module.exports = function (args, options, logger) {
     }
   } else {
     inquirer.prompt(questions).then(answers => {
-      create(answers)
+      create(networkDir, answers)
       if (!options['noStart']) {
         start(networkDir, args.num, args.pm2)
       }
