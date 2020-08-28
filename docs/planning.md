@@ -63,7 +63,7 @@ in the given `network_dir`.
 
 ## Commands
 
-### `shardus create-net [options] [num] [network_dir=cwd]`
+### `shardus create-net [options] [network_dir=instances]`
 
 Creates and starts `num` nodes in the given `network_dir`.
 If no arguments are provided, asks user questionnaire before running.
@@ -71,19 +71,38 @@ If no arguments are provided, asks user questionnaire before running.
 ```
 options:
   --no-start  Does not start the network after creating it
+  --num -n    Number of nodes to create
 ```
 
-### `shardus start-net [num] [network_dir]`
+### `shardus start-net [options] [network_dir=instances]`
 
-Starts `num` nodes in the given `network_dir`.
+Starts nodes in the given `network_dir`.
+If no `--num` is given, starts all nodes in `network_dir` 
 
-### `shardus stop-net [num] [network_dir]`
+```
+options:
+  --num -n  Number of nodes to start
+```
 
-Stops `num` nodes in the given `network_dir`.
+### `shardus stop-net [options] [network_dir=instances]`
 
-### `shardus clean-net [num] [network_dir]`
+Stops nodes in the given `network_dir`.
+If no `--num` is given, stops all nodes in `network_dir` 
 
-Cleans `num` nodes in the given `network_dir`.
+```
+options:
+  --num -n  Number of nodes to stop
+```
+
+### `shardus clean-net [options] [network_dir=instances]`
+
+Cleans nodes in the given `network_dir`.
+If no `--num` is given, cleans all nodes in `network_dir` 
+
+```
+options:
+  --num -n  Number of nodes to clean
+```
 
 ### `shardus list-net [network_dir]`
 
