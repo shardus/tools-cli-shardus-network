@@ -9,10 +9,9 @@ const register = {
       )
       .alias('create')
       // .argument('[options]', 'Options for creating a test network')
-      .argument('[num]', 'Number of nodes to create inside of [network_dir]')
-      .complete(() => [1, 5, 10, 15, 20])
       .argument('[network_dir]', 'The directory to create the network folder (/instances by default)')
-      .complete(() => ['networkFolder', 'instances'])
+      .option('-n, --num <num>', 'Number of nodes to create inside of [network_dir]')
+      .complete(() => [1, 5, 10])
       .option('--no-start', 'Does not start the network after creating it')
       .argument('[pm2...]', 'Additional arguments/flags to pass to PM2. Prefix them with \'pm2\' e.g., \'pm2--no-autorestart\' ')
       .action(actions.create)
@@ -24,8 +23,8 @@ const register = {
         'Start a test network'
       )
       .alias('start')
-      .argument('[num]', 'Number of nodes to start in the [network_dir]')
       .argument('[network_dir]', 'The directory to start the nodes from')
+      .option('-n, --num <num>', 'Number of nodes to start inside of [network_dir]')
       .option('--autorestart', 'Ensures that PM2 will autorestart nodes that have stopped')
       .argument('[pm2...]', 'Additional arguments/flags to pass to PM2. Prefix them with \'pm2\' e.g., \'pm2--no-autorestart\' ')
       .action(actions.start)
@@ -34,8 +33,8 @@ const register = {
     prog
       .command(`${namespace ? namespace + ' ' : ''}stop-net`, 'Stop a test network')
       .alias('stop')
-      .argument('[num]', 'Number of nodes to stop in the [network_dir]')
       .argument('[network_dir]', 'The directory to stop the nodes from')
+      .option('-n, --num <num>', 'Number of nodes to stop inside of [network_dir]')
       .action(actions.stop)
   },
   clean (prog, namespace) {
@@ -45,8 +44,8 @@ const register = {
         'Clean the state of all instances in a test net'
       )
       .alias('clean')
-      .argument('[num]', 'Number of nodes to clean in the [network_dir]')
       .argument('[network_dir]', 'The directory to clean the nodes from')
+      .option('-n, --num <num>', 'Number of nodes to clean inside of [network_dir]')
       .action(actions.clean)
   },
   config (prog, namespace) {

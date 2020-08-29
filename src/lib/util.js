@@ -1,9 +1,7 @@
 const execa = require('execa')
 const fs = require('fs')
 const path = require('path')
-const shell = require('shelljs')
 const { version } = require('../../package.json')
-const PM2_HOME = path.join(process.cwd(), '.pm2/')
 
 const pm2 = path.join(require.resolve('pm2', { paths: [path.join(__dirname, 'node_modules')] }), '../../.bin/pm2')
 

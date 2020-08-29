@@ -138,17 +138,17 @@ module.exports = function (args, options, logger) {
   if (util.checkNetworkFolder(networkDir, true)) {
     const configPath = path.join(networkDir, 'network-config.json')
     const networkConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
-    networkConfig.numberOfNodes = args.num ? parseInt(args.num) : 10
-    create(networkDir, networkConfig, args.num, args.pm2)
+    networkConfig.numberOfNodes = options.num ? parseInt(options.num) : 10
+    create(networkDir, networkConfig, options.num, args.pm2)
     if (!options['noStart']) {
-      start(networkDir, args.num, args.pm2)
+      start(networkDir, options.num, args.pm2)
     }
   }
-  else if (args.num) {
+  else if (options.num) {
     create(networkDir, {
       serverPath: serverPath,
       instancesPath: networkDir,
-      numberOfNodes: parseInt(args.num),
+      numberOfNodes: parseInt(options.num),
       startingExternalPort: defaultNetwork.startingExternalPort,
       startingInternalPort: defaultNetwork.startingInternalPort,
       startSeedNodeServer: defaultNetwork.startSeedNodeServer,
@@ -157,13 +157,13 @@ module.exports = function (args, options, logger) {
       monitorServerPort: defaultNetwork.monitorServerPort
     })
     if (!options['noStart']) {
-      start(networkDir, args.num, args.pm2)
+      start(networkDir, options.num, args.pm2)
     }
   } else {
     inquirer.prompt(questions).then(answers => {
       create(networkDir, answers)
       if (!options['noStart']) {
-        start(networkDir, args.num, args.pm2)
+        start(networkDir, options.num, args.pm2)
       }
     })
   }
