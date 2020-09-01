@@ -4,7 +4,7 @@ module.exports = {
   startingExternalPort: 9001,
   startingInternalPort: 10001,
   lowestPort: 9001,
-  highestPort: 9010,
+  highestPort: 9001,
   instancesPath: 'instances',
   seedNodeServerPort: 4000,
   seedNodeServerAddr: '127.0.0.1',

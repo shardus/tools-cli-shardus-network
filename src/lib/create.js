@@ -17,7 +17,7 @@ module.exports = function (networkDir, configs) {
   const serverConfig = _.cloneDeep(defaultServerConfig)
   serverConfig.server.p2p.seedList = `http://${networkConfig.seedNodeServerAddr}:${networkConfig.seedNodeServerPort}/api/seednodes`
   serverConfig.server.reporting.recipient = `http://${networkConfig.monitorServerAddr}:${networkConfig.monitorServerPort}/api`
-  let highestExternalPort = networkConfig.runningPorts && Math.max(...networkConfig.runningPorts) || networkConfig.startingExternalPort
+  let highestExternalPort = networkConfig.highestPort || networkConfig.startingExternalPort
   let offset = highestExternalPort > networkConfig.startingExternalPort ? 1 : 0
   for (let i = 0; i < networkConfig.numberOfNodes; i++) {
     const nodeConfig = _.cloneDeep(serverConfig)
@@ -26,9 +26,11 @@ module.exports = function (networkDir, configs) {
     shell.mkdir(`shardus-instance-${nodeConfig.server.ip.externalPort}`)
     console.log(`Created server instance on folder <shardus-instance-${nodeConfig.server.ip.externalPort}>`)
     shell.ShellString(JSON.stringify(nodeConfig, null, 2)).to(`shardus-instance-${nodeConfig.server.ip.externalPort}/config.json`)
+    if (nodeConfig.server.ip.externalPort > networkConfig.highestPort) {
+      networkConfig.highestPort= nodeConfig.server.ip.externalPort
+    }
   }
   networkConfig.lowestPort = networkConfig.startingExternalPort
-  networkConfig.highestPort = networkConfig.lowestPort + networkConfig.numberOfNodes - 1
   networkConfig.runningPorts = networkConfig.runningPorts ? networkConfig.runningPorts : []
   shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)
 }

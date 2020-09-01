@@ -3,7 +3,7 @@ const fs = require('fs')
 const path = require('path')
 const util = require('./util')
 
-module.exports = async function (networkDir, num, pm2Args) {
+module.exports = async function (networkDir, num, type, pm2Args) {
   shell.cd(networkDir)
   const instancesPath = path.join(process.cwd())
   const configPath = path.join(instancesPath, 'network-config.json')
@@ -18,7 +18,7 @@ module.exports = async function (networkDir, num, pm2Args) {
   }
 
   const instances = shell.ls('-d', `${instancesPath}/shardus-instance*`)
-  let nodesToStart = num ? parseInt(num) : instances.length
+  let nodesToStart = num ? num : instances.length
 
   try {
     // Start archiver and monitor
@@ -33,18 +33,28 @@ module.exports = async function (networkDir, num, pm2Args) {
   } catch (err) {
     console.log(err)
   }
-  let currentPort = networkConfig.lowestPort
-  for (let i = 0; i < nodesToStart; i++) {
-    if (!networkConfig.runningPorts.includes(networkConfig.lowestPort + i)) {
-      if (instances[i]) {
-        await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
-        networkConfig.runningPorts.push(currentPort++)
+
+  if (type === 'create') {
+    for (let i = 0; i < nodesToStart; i++) {
+      if (!networkConfig.runningPorts.includes(networkConfig.lowestPort + i)) {
+        if (instances[i]) {
+          await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+          networkConfig.runningPorts.push(networkConfig.lowestPort + i)
+        }
+      } else {
+        nodesToStart++
       }
-    } else {
-      nodesToStart++
-      currentPort++
     }
   }
+
+  if (type === 'start') {
+    for (let i = instances.length - num; i < instances.length; i++) {
+      await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+      let port = parseInt(instances[i].split('-').pop())
+      networkConfig.runningPorts.push(port)
+    }
+  }
+
   shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)
 
   console.log()

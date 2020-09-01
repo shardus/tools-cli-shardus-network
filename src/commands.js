@@ -50,7 +50,8 @@ const register = {
   },
   config (prog, namespace) {
     prog.command(
-      `${namespace ? namespace + ' ' : ''}config-net`
+      `${namespace ? namespace + ' ' : ''}config-net`,
+      'Set the config file for all nodes in the network directory'
     )
     .alias('config')
     .argument('[network_dir]', 'The directory to set config.json for all instances')
@@ -59,7 +60,8 @@ const register = {
   list (prog, namespace) {
     prog
       .command(
-        `${namespace ? namespace + ' ' : ''}list-net`
+        `${namespace ? namespace + ' ' : ''}list-net`,
+        'List all the shardus pm2 processes'
       )
       .alias('ls')
       .argument('[network_dir]', 'The directory to stop the nodes from')
@@ -69,9 +71,9 @@ const register = {
     prog
       .command(
         `${namespace ? namespace + ' ' : ''}pm2`,
-        'Run a pm2 command in the test net dir'
+        'Run a pm2 command in the test network dir'
       )
-      .argument('[networkDir]', 'The directory to run the pm2 command in')
+      .argument('<networkDir>', 'The directory to run the pm2 command in')
       .argument('[commands...]', 'pm2 commands to run')
       .action(actions.pm2)
   }

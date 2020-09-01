@@ -54,14 +54,14 @@ const questions = [
     message: 'How many nodes do you want to create ?',
     validate: isNumber
   },
-  { // Starting externap portl
+  { // Starting external port
     default: defaultNetwork.startingExternalPort,
     type: 'number',
     name: 'startingExternalPort',
     message: 'Whats the starting external port ? (the nodes will be created from starting external port to starting external port + number of nodes',
     validate: isNumber
   },
-  { // Starting internap port
+  { // Starting internal port
     default: defaultNetwork.startingInternalPort,
     type: 'number',
     name: 'startingInternalPort',
@@ -75,21 +75,21 @@ const questions = [
       } else return true
     }
   },
-  { // Wheter starts or not the seed node server locally
+  { // Whether starts or not the seed node server locally
     default: defaultNetwork.startSeedNodeServer,
     name: 'startSeedNodeServer',
     type: 'confirm',
     message: 'Do you want to run a archive-server instance locally ?',
     validate: notNull
   },
-  { // If yes, just ask in wich port it'll run
+  { // If yes, just ask in which port it'll run
     default: defaultNetwork.seedNodeServerPort,
     name: 'seedNodeServerPort',
-    message: 'Wich port do you want to run the archive-server ?',
+    message: 'Which port do you want to run the archive-server ?',
     validate: isNumber,
     when: (answers) => answers.startSeedNodeServer
   },
-  { // If not running seed node server locally, asks for ints address and port
+  { // If not running seed node server locally, asks for its address and port
     default: defaultNetwork.seedNodeServerAddr,
     name: 'seedNodeServerAddr',
     message: 'What\'s the archive-server address ?',
@@ -103,21 +103,21 @@ const questions = [
     validate: isNumber,
     when: (answers) => !answers.startSeedNodeServer
   },
-  { // Wheter starts or not the monitor server locally
+  { // Whether starts or not the monitor server locally
     default: defaultNetwork.startMonitorServer,
     name: 'startMonitorServer',
     type: 'confirm',
     message: 'Do you want to run a monitor server instance locally ?',
     validate: notNull
   },
-  { // If yes, just ask in wich port it'll run
+  { // If yes, just ask in which port it'll run
     default: defaultNetwork.monitorServerPort,
     name: 'monitorServerPort',
-    message: 'Wich port do you want to run the monitor server ?',
+    message: 'Which port do you want to run the monitor server ?',
     validate: isNumber,
     when: (answers) => answers.startMonitorServer
   },
-  { // If not running seed node server locally, asks for ints address and port
+  { // If not running seed node server locally, asks for its address and port
     default: defaultNetwork.monitorServerAddr,
     name: 'monitorServerAddr',
     message: 'What\'s the archive-server address ?',
@@ -135,20 +135,20 @@ const questions = [
 
 module.exports = function (args, options, logger) {
   const networkDir = args.networkDir ? path.join(process.cwd(), args.networkDir) : path.join(process.cwd(), 'instances')
+  const num = parseInt(options.num)
   if (util.checkNetworkFolder(networkDir, true)) {
     const configPath = path.join(networkDir, 'network-config.json')
     const networkConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
-    networkConfig.numberOfNodes = options.num ? parseInt(options.num) : 10
-    create(networkDir, networkConfig, options.num, args.pm2)
+    networkConfig.numberOfNodes = num ? num : 10
+    create(networkDir, networkConfig, num, args.pm2)
     if (!options['noStart']) {
-      start(networkDir, options.num, args.pm2)
+      start(networkDir, num, 'start', args.pm2)
     }
-  }
-  else if (options.num) {
+  } else if (options.num) {
     create(networkDir, {
       serverPath: serverPath,
       instancesPath: networkDir,
-      numberOfNodes: parseInt(options.num),
+      numberOfNodes: num,
       startingExternalPort: defaultNetwork.startingExternalPort,
       startingInternalPort: defaultNetwork.startingInternalPort,
       startSeedNodeServer: defaultNetwork.startSeedNodeServer,
@@ -157,13 +157,13 @@ module.exports = function (args, options, logger) {
       monitorServerPort: defaultNetwork.monitorServerPort
     })
     if (!options['noStart']) {
-      start(networkDir, options.num, args.pm2)
+      start(networkDir, num, 'create', args.pm2)
     }
   } else {
     inquirer.prompt(questions).then(answers => {
       create(networkDir, answers)
       if (!options['noStart']) {
-        start(networkDir, options.num, args.pm2)
+        start(networkDir, num, 'create', args.pm2)
       }
     })
   }
