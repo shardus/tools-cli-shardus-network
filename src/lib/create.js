@@ -1,5 +1,6 @@
 const defaultNetworkConfig = require('../configs/default-network-config.js')
 const defaultServerConfig = require('../configs/default-server-config')
+const fs = require('fs')
 const path = require('path')
 const shell = require('shelljs')
 const _ = require('lodash')
@@ -12,7 +13,9 @@ module.exports = function (networkDir, configs) {
   }
   networkConfig.serverPath = path.resolve(networkConfig.serverPath)
   networkConfig['shardus-network-version'] = version
-  shell.mkdir(networkDir)
+  if (!fs.existsSync(networkDir)) {
+    shell.mkdir(networkDir)
+  }
   shell.cd(networkDir)
   const serverConfig = _.cloneDeep(defaultServerConfig)
   serverConfig.server.p2p.seedList = `http://${networkConfig.seedNodeServerAddr}:${networkConfig.seedNodeServerPort}/api/seednodes`
