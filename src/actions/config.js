@@ -18,7 +18,7 @@ const questions = [
 ]
 
 module.exports = function (args, options, logger) {
-  const networkDir = args.networkDir ? path.join(process.cwd(), args.networkDir) : path.join(process.cwd(), 'instances')
+  const networkDir = options.dir ? path.join(process.cwd(), options.dir) : path.join(process.cwd(), 'instances')
   if (util.checkNetworkFolder(networkDir)) {
     const networkConfigPath = path.join(networkDir, 'network-config.json')
     const networkConfig = JSON.parse(fs.readFileSync(networkConfigPath, 'utf-8'))

@@ -9,10 +9,12 @@ const register = {
       )
       .alias('create')
       // .argument('[options]', 'Options for creating a test network')
-      .argument('[network_dir]', 'The directory to create the network folder (/instances by default)')
-      .option('-n, --num <num>', 'Number of nodes to create inside of [network_dir]')
-      .complete(() => [1, 5, 10])
+      // .argument('[network_dir]', 'The directory to create the network folder (/instances by default)')
+      // .option('-n, --num <num>', 'Number of nodes to create inside of [network_dir]')
+      // .complete(() => [1, 5, 10])
+      .option('-d, --dir <network_dir>', 'Path to the network directory (defaults to ./instances)')
       .option('--no-start', 'Does not start the network after creating it')
+      .argument('[num]', 'Number of nodes to create inside of [network_dir]')
       .argument('[pm2...]', 'Additional arguments/flags to pass to PM2. Prefix them with \'pm2\' e.g., \'pm2--no-autorestart\' ')
       .action(actions.create)
   },
@@ -23,9 +25,11 @@ const register = {
         'Start a test network'
       )
       .alias('start')
-      .argument('[network_dir]', 'The directory to start the nodes from')
-      .option('-n, --num <num>', 'Number of nodes to start inside of [network_dir]')
+      // .argument('[network_dir]', 'The directory to start the nodes from')
+      // .option('-n, --num <num>', 'Number of nodes to start inside of [network_dir]')
+      .option('-d, --dir <network_dir>', 'The directory to start the nodes from')
       .option('--autorestart', 'Ensures that PM2 will autorestart nodes that have stopped')
+      .argument('[num]', 'Number of nodes to start inside of [network_dir]')
       .argument('[pm2...]', 'Additional arguments/flags to pass to PM2. Prefix them with \'pm2\' e.g., \'pm2--no-autorestart\' ')
       .action(actions.start)
   },
@@ -33,8 +37,10 @@ const register = {
     prog
       .command(`${namespace ? namespace + ' ' : ''}stop-net`, 'Stop a test network')
       .alias('stop')
-      .argument('[network_dir]', 'The directory to stop the nodes from')
-      .option('-n, --num <num>', 'Number of nodes to stop inside of [network_dir]')
+      // .argument('[network_dir]', 'The directory to stop the nodes from')
+      // .option('-n, --num <num>', 'Number of nodes to stop inside of [network_dir]')
+      .option('-d, --dir <network_dir>', 'The directory to stop the nodes from')
+      .argument('[num]', 'Number of nodes to stop inside of [network_dir]')
       .action(actions.stop)
   },
   clean (prog, namespace) {
@@ -44,8 +50,10 @@ const register = {
         'Clean the state of all instances in a test net'
       )
       .alias('clean')
-      .argument('[network_dir]', 'The directory to clean the nodes from')
-      .option('-n, --num <num>', 'Number of nodes to clean inside of [network_dir]')
+      // .argument('[network_dir]', 'The directory to clean the nodes from')
+      // .option('-n, --num <num>', 'Number of nodes to clean inside of [network_dir]')
+      .option('-d, --dir <network_dir>', 'The directory to clean the nodes from')
+      .argument('[num]', 'Number of nodes to clean inside of [network_dir]')
       .action(actions.clean)
   },
   config (prog, namespace) {
@@ -54,7 +62,8 @@ const register = {
       'Set the config file for all nodes in the network directory'
     )
     .alias('config')
-    .argument('[network_dir]', 'The directory to set config.json for all instances')
+    // .argument('[network_dir]', 'The directory to set config.json for all instances')
+    .option('-d, --dir <network_dir>', 'The directory to set config.json for all instances')
     .action(actions.config)
   },
   list (prog, namespace) {
@@ -64,7 +73,8 @@ const register = {
         'List all the shardus pm2 processes'
       )
       .alias('ls')
-      .argument('[network_dir]', 'The directory to stop the nodes from')
+      // .argument('[network_dir]', 'The directory to stop the nodes from')
+      .option('-d, --dir <network_dir>', 'The directory to list processes from')
       .action(actions.list)
   },
   pm2 (prog, namespace) {
@@ -73,7 +83,8 @@ const register = {
         `${namespace ? namespace + ' ' : ''}pm2`,
         'Run a pm2 command in the test network dir'
       )
-      .argument('<networkDir>', 'The directory to run the pm2 command in')
+      // .argument('<network_dir>', 'The directory to run the pm2 command in')
+      .option('-d, --dir <network_dir>', 'The directory to run the pm2 command in')
       .argument('[commands...]', 'pm2 commands to run')
       .action(actions.pm2)
   }

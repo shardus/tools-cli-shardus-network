@@ -134,17 +134,24 @@ const questions = [
 ]
 
 module.exports = function (args, options, logger) {
-  const networkDir = args.networkDir ? path.join(process.cwd(), args.networkDir) : path.join(process.cwd(), 'instances')
-  const num = parseInt(options.num)
+
+  // DBG
+  console.log(options)
+  console.log(args)
+
+  const networkDir = options.dir ? path.join(process.cwd(), options.dir) : path.join(process.cwd(), 'instances')
+
+  const num = parseInt(args.num)
+
   if (util.checkNetworkFolder(networkDir, true)) {
     const configPath = path.join(networkDir, 'network-config.json')
     const networkConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
     networkConfig.numberOfNodes = num ? num : 10
     create(networkDir, networkConfig, num, args.pm2)
-    if (!options['noStart']) {
+    if (options['noStart'] === false) {
       start(networkDir, num, 'start', args.pm2)
     }
-  } else if (options.num) {
+  } else if (args.num) {
     create(networkDir, {
       serverPath: serverPath,
       instancesPath: networkDir,
@@ -156,13 +163,13 @@ module.exports = function (args, options, logger) {
       startMonitorServer: defaultNetwork.startMonitorServer,
       monitorServerPort: defaultNetwork.monitorServerPort
     })
-    if (!options['noStart']) {
+    if (options['noStart'] === false) {
       start(networkDir, num, 'create', args.pm2)
     }
   } else {
     inquirer.prompt(questions).then(answers => {
       create(networkDir, answers)
-      if (!options['noStart']) {
+      if (options['noStart'] === false) {
         start(networkDir, num, 'create', args.pm2)
       }
     })
