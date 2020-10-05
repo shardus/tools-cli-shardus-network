@@ -11,5 +11,11 @@ module.exports = {
   startSeedNodeServer: true,
   monitorServerPort: 3000,
   monitorServerAddr: '127.0.0.1',
-  startMonitorServer: true
+  startMonitorServer: true,
+  explorerServerPort: 5000,
+  explorerServerAddr: '127.0.0.1',
+  startExplorerServer: true,
+  explorerClientPort: 5001,
+  explorerClientAddr: '127.0.0.1',
+  startExplorerClient: true
 }

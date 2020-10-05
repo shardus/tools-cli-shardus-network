@@ -110,19 +110,12 @@ const questions = [
     message: 'Do you want to run a monitor server instance locally ?',
     validate: notNull
   },
-  { // If yes, just ask in which port it'll run
-    default: defaultNetwork.monitorServerPort,
-    name: 'monitorServerPort',
-    message: 'Which port do you want to run the monitor server ?',
-    validate: isNumber,
-    when: (answers) => answers.startMonitorServer
-  },
-  { // If not running seed node server locally, asks for its address and port
+  {
     default: defaultNetwork.monitorServerAddr,
     name: 'monitorServerAddr',
-    message: 'What\'s the archive-server address ?',
+    message: 'Which address do you want to run the monitor server ?',
     validate: notNull,
-    when: (answers) => !answers.startMonitorServer
+    when: (answers) => answers.monitorServerAddr
   },
   {
     default: defaultNetwork.monitorServerPort,
@@ -130,6 +123,48 @@ const questions = [
     message: 'What\'s the archive-server port ?',
     validate: isNumber,
     when: (answers) => !answers.startMonitorServer
+  },
+  { // Whether starts or not the explorer server locally
+    default: defaultNetwork.startExplorerServer,
+    name: 'startExplorerServer',
+    type: 'confirm',
+    message: 'Do you want to run a explorer server instance locally ?',
+    validate: notNull
+  },
+  {
+    default: defaultNetwork.explorerServerAddr,
+    name: 'explorerServerAddr',
+    message: 'What\'s the explorer-server address ?',
+    validate: notNull,
+    when: (answers) => !answers.startExplorerServer
+  },
+  {
+    default: defaultNetwork.explorerServerPort,
+    name: 'explorerServerPort',
+    message: 'What\'s the explorer-server port ?',
+    validate: isNumber,
+    when: (answers) => !answers.startExplorerServer
+  },
+  { // Whether starts or not the explorer client locally
+    default: defaultNetwork.startExplorerClient,
+    name: 'startExplorerClient',
+    type: 'confirm',
+    message: 'Do you want to run a explorer client instance locally ?',
+    validate: notNull
+  },
+  {
+    default: defaultNetwork.explorerClientAddr,
+    name: 'explorerClientAddr',
+    message: 'What\'s the explorer-client address ?',
+    validate: notNull,
+    when: (answers) => !answers.startExplorerClient
+  },
+  {
+    default: defaultNetwork.explorerClientPort,
+    name: 'explorerClientPort',
+    message: 'What\'s the explorer-client port ?',
+    validate: isNumber,
+    when: (answers) => !answers.startExplorerClient
   }
 ]
 
