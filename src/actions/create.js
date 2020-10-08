@@ -110,17 +110,24 @@ const questions = [
     message: 'Do you want to run a monitor server instance locally ?',
     validate: notNull
   },
+  { // If yes, just ask in which port it'll run
+    default: defaultNetwork.monitorServerPort,
+    name: 'monitorServerPort',
+    message: 'Which port do you want to run the monitor-server ?',
+    validate: isNumber,
+    when: (answers) => answers.startMonitorServer
+  },
   {
     default: defaultNetwork.monitorServerAddr,
     name: 'monitorServerAddr',
-    message: 'Which address do you want to run the monitor server ?',
+    message: 'What\'s the monitor-server address?',
     validate: notNull,
-    when: (answers) => answers.monitorServerAddr
+    when: (answers) => !answers.startMonitorServer
   },
   {
     default: defaultNetwork.monitorServerPort,
     name: 'monitorServerPort',
-    message: 'What\'s the archive-server port ?',
+    message: 'What\'s the monitor-server port ?',
     validate: isNumber,
     when: (answers) => !answers.startMonitorServer
   },
@@ -128,8 +135,15 @@ const questions = [
     default: defaultNetwork.startExplorerServer,
     name: 'startExplorerServer',
     type: 'confirm',
-    message: 'Do you want to run a explorer server instance locally ?',
+    message: 'Do you want to run an explorer-server instance locally ?',
     validate: notNull
+  },
+  { // If yes, just ask in which port it'll run
+    default: defaultNetwork.explorerServerPort,
+    name: 'explorerServerPort',
+    message: 'Which port do you want to run the explorer-server ?',
+    validate: isNumber,
+    when: (answers) => answers.startExplorerServer
   },
   {
     default: defaultNetwork.explorerServerAddr,
@@ -145,27 +159,27 @@ const questions = [
     validate: isNumber,
     when: (answers) => !answers.startExplorerServer
   },
-  { // Whether starts or not the explorer client locally
-    default: defaultNetwork.startExplorerClient,
-    name: 'startExplorerClient',
-    type: 'confirm',
-    message: 'Do you want to run a explorer client instance locally ?',
-    validate: notNull
-  },
-  {
-    default: defaultNetwork.explorerClientAddr,
-    name: 'explorerClientAddr',
-    message: 'What\'s the explorer-client address ?',
-    validate: notNull,
-    when: (answers) => !answers.startExplorerClient
-  },
-  {
-    default: defaultNetwork.explorerClientPort,
-    name: 'explorerClientPort',
-    message: 'What\'s the explorer-client port ?',
-    validate: isNumber,
-    when: (answers) => !answers.startExplorerClient
-  }
+  // { // Whether starts or not the explorer client locally
+  //   default: defaultNetwork.startExplorerClient,
+  //   name: 'startExplorerClient',
+  //   type: 'confirm',
+  //   message: 'Do you want to run a explorer client instance locally ?',
+  //   validate: notNull
+  // },
+  // {
+  //   default: defaultNetwork.explorerClientAddr,
+  //   name: 'explorerClientAddr',
+  //   message: 'What\'s the explorer-client address ?',
+  //   validate: notNull,
+  //   when: (answers) => !answers.startExplorerClient
+  // },
+  // {
+  //   default: defaultNetwork.explorerClientPort,
+  //   name: 'explorerClientPort',
+  //   message: 'What\'s the explorer-client port ?',
+  //   validate: isNumber,
+  //   when: (answers) => !answers.startExplorerClient
+  // }
 ]
 
 module.exports = function (args, options, logger) {
@@ -196,7 +210,9 @@ module.exports = function (args, options, logger) {
       startSeedNodeServer: defaultNetwork.startSeedNodeServer,
       seedNodeServerPort: defaultNetwork.seedNodeServerPort,
       startMonitorServer: defaultNetwork.startMonitorServer,
-      monitorServerPort: defaultNetwork.monitorServerPort
+      monitorServerPort: defaultNetwork.monitorServerPort,
+      startExplorerServer: defaultNetwork.startExplorerServer,
+      explorerServerPort: defaultNetwork.explorerServerPort
     })
     if (options['noStart'] === false) {
       start(networkDir, num, 'create', args.pm2)

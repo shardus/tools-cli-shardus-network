@@ -34,10 +34,10 @@ module.exports = async function (networkDir, num, type, pm2Args) {
       await util.pm2Start(networkDir, require.resolve('explorer-server', { paths: [process.cwd()] }), 'explorer-server', { PORT: networkConfig.explorerServerPort }, pm2Args)
       networkConfig.startExplorerServer = false
     }
-    if (networkConfig.startExplorerClient) {
-      await util.pm2Start(networkDir, require.resolve('explorer-client', { paths: [process.cwd()] }), 'explorer-client', { PORT: networkConfig.explorerClientPort }, pm2Args)
-      networkConfig.startExplorerClient = false
-    }
+    // if (networkConfig.startExplorerClient) {
+    //   await util.pm2Start(networkDir, require.resolve('explorer-client', { paths: [process.cwd()] }), 'explorer-client', { PORT: networkConfig.explorerClientPort }, pm2Args)
+    //   networkConfig.startExplorerClient = false
+    // }
   } catch (err) {
     console.log(err)
   }
