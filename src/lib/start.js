@@ -31,7 +31,7 @@ module.exports = async function (networkDir, num, type, pm2Args) {
       networkConfig.startMonitorServer = false
     }
     if (networkConfig.startExplorerServer) {
-      await util.pm2Start(networkDir, require.resolve('explorer-server', { paths: [process.cwd()] }), 'explorer-server', { PORT: networkConfig.explorerServerPort }, pm2Args)
+      await util.pm2Start(networkDir, require.resolve('explorer-server', { paths: [process.cwd()] }), 'explorer-server', {VIEW_DIR: '../', PORT: networkConfig.explorerServerPort }, pm2Args)
       networkConfig.startExplorerServer = false
     }
     // if (networkConfig.startExplorerClient) {
