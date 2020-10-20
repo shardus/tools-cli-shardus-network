@@ -72,6 +72,7 @@ const register = {
         `${namespace ? namespace + ' ' : ''}list-net`,
         'List all the shardus pm2 processes'
       )
+      .alias('list')
       .alias('ls')
       // .argument('[network_dir]', 'The directory to stop the nodes from')
       .option('-d, --dir <network_dir>', 'The directory to list processes from')
