@@ -22,7 +22,7 @@ const register = {
     prog
       .command(
         `${namespace ? namespace + ' ' : ''}start-net`,
-        'Start a test network'
+        'Start a stopped test network, or create a new one'
       )
       .alias('start')
       // .argument('[network_dir]', 'The directory to start the nodes from')
