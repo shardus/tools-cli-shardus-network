@@ -61,7 +61,7 @@ const checkNetworkFolder = (networkPath, silent) => {
     if (!isVersionValid) return false
   } else {
     if (!silent) {
-      console.log('Error: Cannot find a valid network-config.json file on current directory.')
+      console.log(`Error: Cannot find a valid network-config.json file on ${networkPath}.`)
     }
     return false
   }
