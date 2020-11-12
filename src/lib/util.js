@@ -43,14 +43,22 @@ const pm2Exec = async (networkDir, arg, env = {}) => {
   await execa.command(`${pm2} ${arg}`, { cwd: networkDir, env, stdio: [0, 1, 2] })
 }
 
+const checkVersion = (v1, v2) => {
+  let major1 = v1.split(".")[0]
+  let major2 = v2.split(".")[0]
+  if (major1 !== major2) {
+    console.log('Error: Network configuration was created with a different major version of shardus network tool.')
+    return false
+  }
+  return true
+}
+
 const checkNetworkFolder = (networkPath, silent) => {
   const networkConfigPath = path.join(networkPath, 'network-config.json')
   if (fs.existsSync(networkConfigPath)) {
     const networkConfig = JSON.parse(fs.readFileSync(networkConfigPath))
-    if (networkConfig['shardus-network-version'] !== version) {
-      console.log('Error: Network configuration was created with a different shardus network version.')
-      return false
-    }
+    let isVersionValid = checkVersion(networkConfig['shardus-network-version'], version)
+    if (!isVersionValid) return false
   } else {
     if (!silent) {
       console.log('Error: Cannot find a valid network-config.json file on current directory.')
