@@ -4,10 +4,6 @@ const util = require('../lib/util')
 const fs = require('fs')
 
 module.exports = function (args, options, logger) {
-  const networkDir = options.dir ? path.join(process.cwd(), options.dir) : process.cwd()
-  if (fs.existsSync(networkDir)) {
-    if (util.checkNetworkFolder(networkDir)) clean(networkDir, args.num)
-  } else {
-    throw new Error(`Unable to find network directory ${networkDir}`)
-  }
+  const networkDir = util.setNetworkDirOrErr(options.dir)
+  clean(networkDir, args.num)
 }

@@ -7,7 +7,7 @@ const pm2 = path.join(require.resolve('pm2', { paths: [path.join(__dirname, 'nod
 
 const pm2Start = async (networkDir, script, name, env = {}, pm2Args = []) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
-  const parsedPm2Args = pm2Args.map(arg => arg.split('pm2')[1] || arg).join(' ')
+  const parsedPm2Args = pm2Args.map((arg) => arg.split('pm2')[1] || arg).join(' ')
   const execaCmd = `${pm2} start ${script} --name="${name}" ${parsedPm2Args}`
   console.log('pm2Start', execaCmd)
   await execa.command(execaCmd, { cwd: networkDir, env, stdio: [0, 1, 2] })
@@ -44,28 +44,64 @@ const pm2Exec = async (networkDir, arg, env = {}) => {
 }
 
 const checkVersion = (v1, v2) => {
-  let major1 = v1.split(".")[0]
-  let major2 = v2.split(".")[0]
+  let major1 = v1.split('.')[0]
+  let major2 = v2.split('.')[0]
   if (major1 !== major2) {
-    console.log('Error: Network configuration was created with a different major version of shardus network tool.')
     return false
   }
   return true
 }
 
 const checkNetworkFolder = (networkPath, silent) => {
-  const networkConfigPath = path.join(networkPath, 'network-config.json')
-  if (fs.existsSync(networkConfigPath)) {
-    const networkConfig = JSON.parse(fs.readFileSync(networkConfigPath))
-    let isVersionValid = checkVersion(networkConfig['shardus-network-version'], version)
-    if (!isVersionValid) return false
-  } else {
-    if (!silent) {
-      console.log(`Error: Cannot find a valid network-config.json file on ${networkPath}.`)
-    }
+  // Return false if networkPath doesn't exist
+  if (fs.existsSync(networkPath) === false) {
+    if (!silent) console.error(`ERROR: Unable to find network directory ${networkPath}`)
     return false
   }
+
+  const networkConfigPath = path.join(networkPath, 'network-config.json')
+
+  // Return false if network-config.json is not found in networkPath
+  if (fs.existsSync(networkConfigPath) === false) {
+    if (!silent) console.error(`ERROR: Cannot find a valid network-config.json file in ${networkPath}.`)
+    return false
+  }
+
+  // Attempt to parse network-config.json
+  let networkConfig
+  try {
+    networkConfig = JSON.parse(fs.readFileSync(networkConfigPath))
+  } catch (err) {
+    if (!silent) console.error(`ERROR: Error parsing network-config.json: ${err.message}`)
+    return false
+  }
+
+  // Return false if our shardus-network tool version is not compatible with the one that created the network
+  if (checkVersion(networkConfig['shardus-network-version'], version) === false) {
+    if (!silent) console.error('ERROR: Network configuration was created with a different major version of shardus network tool.')
+    return false
+  }
+
   return true
 }
 
-module.exports = { pm2Start, pm2Stop, pm2Kill, pm2Reset, pm2Del, pm2List, pm2Exec, checkNetworkFolder }
+const setNetworkDirOrErr = (dir) => {
+  // Set networkDir to CWD if dir is not passed
+  let networkDir = path.join(process.cwd(), dir || '')
+
+  // Set networkDir to networkDir/instances if networkDir fails check
+  if (checkNetworkFolder(networkDir) === false) {
+    networkDir = path.join(networkDir, 'instances')
+
+    // Error if networkDir/instances fails check too
+    console.log(`Checking ${networkDir}...`)
+    if (checkNetworkFolder(networkDir) === false) {
+      throw 'Could not find network-config.json'
+    }
+  }
+
+  // Return networkDir if alls good
+  return networkDir
+}
+
+module.exports = { pm2Start, pm2Stop, pm2Kill, pm2Reset, pm2Del, pm2List, pm2Exec, checkNetworkFolder, setNetworkDirOrErr }
