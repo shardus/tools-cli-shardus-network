@@ -20,6 +20,8 @@ module.exports = async function (networkDir, num, type, pm2Args) {
   const instances = shell.ls('-d', `${instancesPath}/shardus-instance*`)
   let nodesToStart = num ? num : instances.length
 
+  await util.pm2RotateLog(networkDir, {})
+
   try {
     // Start archiver and monitor
     if (networkConfig.startSeedNodeServer) {

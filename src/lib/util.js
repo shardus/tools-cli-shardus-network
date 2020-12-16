@@ -3,11 +3,14 @@ const fs = require('fs')
 const path = require('path')
 const { version } = require('../../package.json')
 
-const pm2 = path.join(require.resolve('pm2', { paths: [path.join(__dirname, 'node_modules')] }), '../../.bin/pm2')
+const pm2 = path.join(
+  require.resolve('pm2', { paths: [path.join(__dirname, 'node_modules')] }),
+  '../../.bin/pm2'
+)
 
 const pm2Start = async (networkDir, script, name, env = {}, pm2Args = []) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
-  const parsedPm2Args = pm2Args.map((arg) => arg.split('pm2')[1] || arg).join(' ')
+  const parsedPm2Args = pm2Args.map(arg => arg.split('pm2')[1] || arg).join(' ')
   const execaCmd = `${pm2} start ${script} --name="${name}" ${parsedPm2Args}`
   console.log('pm2Start', execaCmd)
   await execa.command(execaCmd, { cwd: networkDir, env, stdio: [0, 1, 2] })
@@ -15,7 +18,11 @@ const pm2Start = async (networkDir, script, name, env = {}, pm2Args = []) => {
 
 const pm2Stop = async (networkDir, arg, env = {}) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
-  await execa.command(`${pm2} stop ${arg}`, { cwd: networkDir, env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} stop ${arg}`, {
+    cwd: networkDir,
+    env,
+    stdio: [0, 1, 2]
+  })
 }
 
 const pm2Kill = async (networkDir, env = {}) => {
@@ -38,9 +45,33 @@ const pm2List = async (networkDir, env = {}) => {
   await execa.command(`${pm2} list`, { cwd: networkDir, env, stdio: [0, 1, 2] })
 }
 
+const pm2RotateLog = async (networkDir, env = {}) => {
+  env.PM2_HOME = path.join(networkDir, '.pm2/')
+  await execa.command(`${pm2} install pm2-logrotate`, {
+    cwd: networkDir,
+    env,
+    stdio: [0, 1, 2]
+  })
+  await execa.command(`${pm2} set pm2-logrotate:max_size 10M`, {
+    cwd: networkDir,
+    env,
+    stdio: [0, 1, 2]
+  })
+  await execa.command(`${pm2} set pm2-logrotate:retain 10`, {
+    cwd: networkDir,
+    env,
+    stdio: [0, 1, 2]
+  })
+  await execa.command(`${pm2} conf`, { cwd: networkDir, env, stdio: [0, 1, 2] })
+}
+
 const pm2Exec = async (networkDir, arg, env = {}) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
-  await execa.command(`${pm2} ${arg}`, { cwd: networkDir, env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} ${arg}`, {
+    cwd: networkDir,
+    env,
+    stdio: [0, 1, 2]
+  })
 }
 
 const checkVersion = (v1, v2) => {
@@ -55,7 +86,8 @@ const checkVersion = (v1, v2) => {
 const checkNetworkFolder = (networkPath, silent) => {
   // Return false if networkPath doesn't exist
   if (fs.existsSync(networkPath) === false) {
-    if (!silent) console.error(`ERROR: Unable to find network directory ${networkPath}`)
+    if (!silent)
+      console.error(`ERROR: Unable to find network directory ${networkPath}`)
     return false
   }
 
@@ -63,7 +95,10 @@ const checkNetworkFolder = (networkPath, silent) => {
 
   // Return false if network-config.json is not found in networkPath
   if (fs.existsSync(networkConfigPath) === false) {
-    if (!silent) console.error(`ERROR: Cannot find a valid network-config.json file in ${networkPath}.`)
+    if (!silent)
+      console.error(
+        `ERROR: Cannot find a valid network-config.json file in ${networkPath}.`
+      )
     return false
   }
 
@@ -72,20 +107,26 @@ const checkNetworkFolder = (networkPath, silent) => {
   try {
     networkConfig = JSON.parse(fs.readFileSync(networkConfigPath))
   } catch (err) {
-    if (!silent) console.error(`ERROR: Error parsing network-config.json: ${err.message}`)
+    if (!silent)
+      console.error(`ERROR: Error parsing network-config.json: ${err.message}`)
     return false
   }
 
   // Return false if our shardus-network tool version is not compatible with the one that created the network
-  if (checkVersion(networkConfig['shardus-network-version'], version) === false) {
-    if (!silent) console.error('ERROR: Network configuration was created with a different major version of shardus network tool.')
+  if (
+    checkVersion(networkConfig['shardus-network-version'], version) === false
+  ) {
+    if (!silent)
+      console.error(
+        'ERROR: Network configuration was created with a different major version of shardus network tool.'
+      )
     return false
   }
 
   return true
 }
 
-const setNetworkDirOrErr = (dir) => {
+const setNetworkDirOrErr = dir => {
   // Set networkDir to CWD if dir is not passed
   let networkDir = path.join(process.cwd(), dir || '')
 
@@ -104,4 +145,15 @@ const setNetworkDirOrErr = (dir) => {
   return networkDir
 }
 
-module.exports = { pm2Start, pm2Stop, pm2Kill, pm2Reset, pm2Del, pm2List, pm2Exec, checkNetworkFolder, setNetworkDirOrErr }
+module.exports = {
+  pm2Start,
+  pm2Stop,
+  pm2Kill,
+  pm2Reset,
+  pm2Del,
+  pm2List,
+  pm2RotateLog,
+  pm2Exec,
+  checkNetworkFolder,
+  setNetworkDirOrErr
+}
