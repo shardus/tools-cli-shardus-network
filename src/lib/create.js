@@ -5,11 +5,13 @@ const path = require('path')
 const shell = require('shelljs')
 const _ = require('lodash')
 const { version } = require('../../package.json')
+const util = require('./util')
 
-module.exports = function (networkDir, configs) {
+module.exports = async function (networkDir, configs) {
+  // Create networkDir containing network-config.json
   const networkConfig = {
     ...defaultNetworkConfig,
-    ...configs
+    ...configs,
   }
   networkConfig.serverPath = path.resolve(networkConfig.serverPath)
   networkConfig['shardus-network-version'] = version
@@ -30,7 +32,7 @@ module.exports = function (networkDir, configs) {
     console.log(`Created server instance on folder <shardus-instance-${nodeConfig.server.ip.externalPort}>`)
     shell.ShellString(JSON.stringify(nodeConfig, null, 2)).to(`shardus-instance-${nodeConfig.server.ip.externalPort}/config.json`)
     if (nodeConfig.server.ip.externalPort > networkConfig.highestPort) {
-      networkConfig.highestPort= nodeConfig.server.ip.externalPort
+      networkConfig.highestPort = nodeConfig.server.ip.externalPort
     }
   }
   networkConfig.lowestPort = networkConfig.startingExternalPort
