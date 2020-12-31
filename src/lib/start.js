@@ -2,8 +2,9 @@ const shell = require('shelljs')
 const fs = require('fs')
 const path = require('path')
 const util = require('./util')
+const archiverKeys = require('../configs/archiver-config')
 
-module.exports = async function (networkDir, num, type, pm2Args) {
+module.exports = async function (networkDir, num, type, pm2Args, options) {
   shell.cd(networkDir)
   const instancesPath = path.join(process.cwd())
   const configPath = path.join(instancesPath, 'network-config.json')
@@ -21,9 +22,28 @@ module.exports = async function (networkDir, num, type, pm2Args) {
   let nodesToStart = num ? num : instances.length
 
   try {
+    if (options.archivers) {
+      let existingArchivers = [...networkConfig.existingArchivers]
+      let archiverCount = parseInt(options.archivers)
+      if (archiverCount > 9) archiverCount = 9
+      for (let i = 1; i <= archiverCount; i++) {
+        await util.pm2Start(networkDir, require.resolve('archive-server', { paths: [process.cwd()] }), `archive-server-${i + 1}`, { ARCHIVER_PORT: networkConfig.seedNodeServerPort + i, ARCHIVER_PUBLIC_KEY: archiverKeys[i].publicKey, ARCHIVER_SECRET_KEY: archiverKeys[i].secretKey, ARCHIVER_EXISTING: JSON.stringify(existingArchivers), ARCHIVER_DB: `archiver-db-${archiverKeys[i].port}` }, pm2Args)
+      }
+      for (let i = 1; i <= archiverCount; i++) {
+        existingArchivers.push({ ip: '127.0.0.1', port: networkConfig.seedNodeServerPort + i, publicKey: archiverKeys[i] })
+      }
+      networkConfig.existingArchivers = existingArchivers
+      shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)
+      return
+    }
+
     // Start archiver and monitor
     if (networkConfig.startSeedNodeServer) {
-      await util.pm2Start(networkDir, require.resolve('archive-server', { paths: [process.cwd()] }), 'archive-server', { ARCHIVER_PORT: networkConfig.seedNodeServerPort }, pm2Args)
+
+      await util.pm2Start(networkDir, require.resolve('archive-server', { paths: [process.cwd()] }), `archive-server-1`, { ARCHIVER_PORT: networkConfig.seedNodeServerPort, ARCHIVER_PUBLIC_KEY: archiverKeys[0].publicKey, ARCHIVER_SECRET_KEY: archiverKeys[0].secretKey, ARCHIVER_EXISTING: '[]', ARCHIVER_DB: `archiver-db-${archiverKeys[0].port}` }, pm2Args)
+
+      let existingArchivers = [{ ip: '127.0.0.1', port: networkConfig.seedNodeServerPort, publicKey: archiverKeys[0] }]
+      networkConfig.existingArchivers = existingArchivers
       networkConfig.startSeedNodeServer = false
     }
     if (networkConfig.startMonitorServer) {

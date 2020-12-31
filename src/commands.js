@@ -29,6 +29,7 @@ const register = {
       .option('--log-size-mb <log_size_mb>', 'Max log file size (defaults to 10 Mb)')
       .option('--log-num <log_num>', 'Number of log files to retain (defaults to 10 files)')
       .option('--no-log-rotation', 'Does not enable log rotation')
+      .option('-a, --archivers <archivers_count>', 'Start archivers')
       .argument('[num]', 'Number of nodes to start inside of [network_dir]')
       .argument('[pm2...]', "Additional arguments/flags to pass to PM2. Prefix them with 'pm2' e.g., 'pm2--no-autorestart' ")
       .action(actions.start)

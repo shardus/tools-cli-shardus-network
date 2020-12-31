@@ -1,0 +1,52 @@
+module.exports = [
+    {
+        port: 4000,
+        publicKey: '758b1c119412298802cd28dbfa394cdfeecc4074492d60844cc192d632d84de3',
+        secretKey: '3be00019f23847529bd63e41124864983175063bb524bd54ea3c155f2fa12969758b1c119412298802cd28dbfa394cdfeecc4074492d60844cc192d632d84de3'
+    },
+    {
+        port: 4001,
+        publicKey: 'e8a5c26b9e2c3c31eb7c7d73eaed9484374c16d983ce95f3ab18a62521964a94',
+        secretKey: '3ea2ee94d1de9ef0e59a08af12aad53375cab0857f73fe243184c6f85edefb39e8a5c26b9e2c3c31eb7c7d73eaed9484374c16d983ce95f3ab18a62521964a94'
+    },
+    {
+        port: 4002,
+        publicKey: '9426b64e675cad739d69526bf7e27f3f304a8a03dca508a9180f01e9269ce447',
+        secretKey: '7d8819b6fac8ba2fbac7363aaeb5c517e52e615f95e1a161d635521d5e4969739426b64e675cad739d69526bf7e27f3f304a8a03dca508a9180f01e9269ce447'
+    },
+    {
+        port: 4003,
+        publicKey: 'ac9708eeb0ec408b42f6e2fdce85f96dbbb9f90a6c8e984fc7ea225baae7882b',
+        secretKey: '49b9430a8b4631a1141e05502d92569383ea196261d3cf4d7572d89823af7214ac9708eeb0ec408b42f6e2fdce85f96dbbb9f90a6c8e984fc7ea225baae7882b'
+    },
+    {
+        port: 4004,
+        publicKey: '7a95c68fa1a852e25e4f33e1dc5b1b8b142c4b52209ec3535ac059b4b4db3b4c',
+        secretKey: '580ef77852441e5fb53030068d666cdec69b9d3c4777f25ff281c74755209b6e7a95c68fa1a852e25e4f33e1dc5b1b8b142c4b52209ec3535ac059b4b4db3b4c'
+    },
+    {
+        port: 4005,
+        publicKey: 'fd24ef72d1e3ea49165df43e6f3b2737d5480ae4b7309cc11143af4ab35d28b2',
+        secretKey: 'a200a434ab9167526e69bef6f3609e4f8ecf19bc991b4d56dcd65f03dd332674fd24ef72d1e3ea49165df43e6f3b2737d5480ae4b7309cc11143af4ab35d28b2'
+    },
+    {
+        port: 4006,
+        publicKey: '70c97b6a4cfaa7e75148e847dadc55314b1ce6c48eebe0044d6e80224728c93c',
+        secretKey: 'd02dfdab4c102f26d22d1340e300f71357ab826cc2237dbac2c38f817dc91cfc70c97b6a4cfaa7e75148e847dadc55314b1ce6c48eebe0044d6e80224728c93c'
+    },
+    {
+        port: 4007,
+        publicKey: '0423e72b38c57dcb51e0825c3038ad15faae31e455ab160513923ba3d1047626',
+        secretKey: 'e0bf6e6ac82dae7282731952d310bc42eeec80793ee7925757d5778a51bcb61a0423e72b38c57dcb51e0825c3038ad15faae31e455ab160513923ba3d1047626'
+    },
+    {
+        port: 4008,
+        publicKey: '41f24126b5326bb72300338b1dac97ef4dd2fab3e20e16606a8393a8d14eff54',
+        secretKey: 'cf402cea73cfd41e3380b4dc3ab7edc625bbd09154d193199c305588b5bf2acd41f24126b5326bb72300338b1dac97ef4dd2fab3e20e16606a8393a8d14eff54'
+    },
+    {
+        port: 4009,
+        publicKey: 'aec5d2b663869d9c22ba99d8de76f3bff0f54fa5e39d2899ec1f3f4543422ec7',
+        secretKey: 'f276ef8be2ebfcc2d3361c94df0cdd401cfe65c29f01bf76967474b4f084390caec5d2b663869d9c22ba99d8de76f3bff0f54fa5e39d2899ec1f3f4543422ec7'
+    }
+]

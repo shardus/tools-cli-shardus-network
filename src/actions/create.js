@@ -211,9 +211,6 @@ const getQuestions = (options) => {
 
 module.exports = async function (args, options, logger) {
   // DBG
-  console.log('options', options)
-  console.log('args', args)
-
   const networkDir = options.dir ? path.join(process.cwd(), options.dir) : path.join(process.cwd(), 'instances')
 
   const num = parseInt(args.num)

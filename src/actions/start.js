@@ -7,7 +7,7 @@ const fs = require('fs')
 module.exports = function (args, options, logger) {
   try {
     const networkDir = util.setNetworkDirOrErr(options.dir)
-    start(networkDir, parseInt(args.num), 'create', args.pm2)
+    start(networkDir, parseInt(args.num), 'create', args.pm2, options)
   } catch (err) {
     create(args, Object.assign(options, { noStart: false }), logger)
   }

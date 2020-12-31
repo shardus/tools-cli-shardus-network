@@ -20,8 +20,8 @@ module.exports = async function (networkDir, num) {
   shell.rm('-rf', path.join(instancesPath, '.pm2'))
   console.log(`Cleaned ./pm2`)
   // Delete './archiver-db.sqlite'
-  shell.rm('-rf', path.join(instancesPath, 'archiver-db.sqlite'))
-  console.log(`Cleaned ./archiver-db.sqlite`)
+  shell.rm('-rf', path.join(instancesPath, 'archiver-db*'))
+  console.log(`Cleaned ./archiver-db*`)
   // Delete './explorer-db.sqlite'
   shell.rm('-rf', path.join(instancesPath, 'explorer-db.sqlite'))
   console.log(`Cleaned ./explorer-db.sqlite`)
