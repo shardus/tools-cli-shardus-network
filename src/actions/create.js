@@ -248,7 +248,7 @@ module.exports = async function (args, options, logger) {
       await util.pm2SetRotateLog(networkDir, options.logSizeMb, options.logSize)
     }
     if (options['noStart'] === false) {
-      start(networkDir, num, 'create', args.pm2)
+      start(networkDir, num, 'create', args.pm2, options)
     }
   } else {
     const questions = getQuestions(options)
@@ -259,7 +259,7 @@ module.exports = async function (args, options, logger) {
         await util.pm2SetRotateLog(networkDir, answers.logSize, answers.logNum)
       }
       if (options['noStart'] === false) {
-        start(networkDir, num, 'create', args.pm2)
+        start(networkDir, num, 'create', args.pm2, options)
       }
     })
   }
