@@ -24,12 +24,12 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
   try {
     if (options.archivers) {
       let existingArchivers = [...networkConfig.existingArchivers]
-      let archiverCount = parseInt(options.archivers)
-      if (archiverCount > 9) archiverCount = 9
-      for (let i = 1; i <= archiverCount; i++) {
-        await util.pm2Start(networkDir, require.resolve('archive-server', { paths: [process.cwd()] }), `archive-server-${i + 1}`, { ARCHIVER_PORT: networkConfig.seedNodeServerPort + i, ARCHIVER_PUBLIC_KEY: archiverKeys[i].publicKey, ARCHIVER_SECRET_KEY: archiverKeys[i].secretKey, ARCHIVER_EXISTING: JSON.stringify(existingArchivers), ARCHIVER_DB: `archiver-db-${archiverKeys[i].port}` }, pm2Args)
+      let newArchiverCount = parseInt(options.archivers)
+      if (newArchiverCount > 9) newArchiverCount = 9
+      for (let i = 0; i < newArchiverCount; i++) {
+        await util.pm2Start(networkDir, require.resolve('archive-server', { paths: [process.cwd()] }), `archive-server-${i + 1 + existingArchivers.length}`, { ARCHIVER_PORT: networkConfig.seedNodeServerPort + existingArchivers.length + i, ARCHIVER_PUBLIC_KEY: archiverKeys[existingArchivers.length + i].publicKey, ARCHIVER_SECRET_KEY: archiverKeys[existingArchivers.length + i].secretKey, ARCHIVER_EXISTING: JSON.stringify(existingArchivers), ARCHIVER_DB: `archiver-db-${archiverKeys[existingArchivers.length + i].port}` }, pm2Args)
       }
-      for (let i = 1; i <= archiverCount; i++) {
+      for (let i = 1; i <= newArchiverCount; i++) {
         existingArchivers.push({ ip: '127.0.0.1', port: networkConfig.seedNodeServerPort + i, publicKey: archiverKeys[i] })
       }
       networkConfig.existingArchivers = existingArchivers
