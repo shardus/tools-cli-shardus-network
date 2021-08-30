@@ -20,7 +20,13 @@ module.exports = async function (networkDir, configs) {
   }
   shell.cd(networkDir)
   const serverConfig = _.cloneDeep(defaultServerConfig)
-  serverConfig.server.p2p.seedList = `http://${networkConfig.seedNodeServerAddr}:${networkConfig.seedNodeServerPort}/api/seednodes`
+  serverConfig.server.p2p.existingArchivers = [
+    {
+      "ip": networkConfig.seedNodeServerAddr,
+      "port": networkConfig.seedNodeServerPort,
+      "publicKey": "758b1c119412298802cd28dbfa394cdfeecc4074492d60844cc192d632d84de3"
+    }
+  ]
   serverConfig.server.reporting.recipient = `http://${networkConfig.monitorServerAddr}:${networkConfig.monitorServerPort}/api`
   let highestExternalPort = networkConfig.highestPort || networkConfig.startingExternalPort
   let offset = highestExternalPort > networkConfig.startingExternalPort ? 1 : 0
