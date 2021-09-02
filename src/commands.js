@@ -14,6 +14,7 @@ const register = {
       .option('--log-num <log_num>', 'Number of log files to retain (defaults to 10 files)')
       .option('--no-start', 'Does not start the network after creating it')
       .option('--no-log-rotation', 'Does not enable log rotation')
+      .option('--auto-ip', 'Makes nodes discover their IP automatically')
       .option('--archiver-addr <archiver_addr>', 'Uses the passed addr as the archiver addr')
       .option('--archiver-port <archiver_port>', 'Uses the passed port as the archiver port')
       .option('--monitor-addr <monitor_addr>', 'Uses the passed addr as the monitor addr')

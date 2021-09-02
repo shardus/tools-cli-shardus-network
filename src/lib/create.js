@@ -28,6 +28,11 @@ module.exports = async function (networkDir, configs) {
     }
   ]
   serverConfig.server.reporting.recipient = `http://${networkConfig.monitorServerAddr}:${networkConfig.monitorServerPort}/api`
+  if (networkConfig.autoIp) {
+    serverConfig.server.ip.externalIp = 'auto'
+    serverConfig.server.ip.internalIp = 'auto'
+  }
+
   let highestExternalPort = networkConfig.highestPort || networkConfig.startingExternalPort
   let offset = highestExternalPort > networkConfig.startingExternalPort ? 1 : 0
   for (let i = 0; i < networkConfig.numberOfNodes; i++) {

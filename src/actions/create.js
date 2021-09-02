@@ -228,24 +228,25 @@ module.exports = async function (args, options, logger) {
       start(networkDir, num, 'start', args.pm2)
     }
   } else if (args.num) {
-    if (options[])
-      await create(networkDir, {
-        serverPath: serverPath,
-        instancesPath: networkDir,
-        numberOfNodes: num,
-        startingExternalPort: defaultNetwork.startingExternalPort,
-        startingInternalPort: defaultNetwork.startingInternalPort,
-        seedNodeServerPort: (options.archiverPort) ? Number(options.archiverPort) : defaultNetwork.seedNodeServerPort,
-        seedNodeServerAddr: (options.archiverAddr) ? options.archiverAddr : defaultNetwork.seedNodeServerAddr,
-        startSeedNodeServer: (options.archiverAddr && options.archiverPort) ? false : defaultNetwork.startSeedNodeServer,
-        monitorServerPort: (options.monitorPort) ? Number(options.monitorPort) : defaultNetwork.monitorServerPort,
-        monitorServerAddr: (options.monitorAddr) ? options.monitorAddr : defaultNetwork.monitorServerAddr,
-        startMonitorServer: (options.monitorAddr && options.monitorPort) ? false : defaultNetwork.startMonitorServer,
-        startExplorerServer: (options.monitorAddr && options.monitorPort) ? false : defaultNetwork.startExplorerServer,
-        explorerServerPort: defaultNetwork.explorerServerPort,
-        logSize: (options.logSizeMb) ? options.logSizeMb : defaultNetwork.logSize,
-        logNum: (options.logNum) ? options.logNum : defaultNetwork.logNum
-      })
+    const config = {
+      serverPath: serverPath,
+      instancesPath: networkDir,
+      numberOfNodes: num,
+      startingExternalPort: defaultNetwork.startingExternalPort,
+      startingInternalPort: defaultNetwork.startingInternalPort,
+      seedNodeServerPort: (options.archiverPort) ? Number(options.archiverPort) : defaultNetwork.seedNodeServerPort,
+      seedNodeServerAddr: (options.archiverAddr) ? options.archiverAddr : defaultNetwork.seedNodeServerAddr,
+      startSeedNodeServer: (options.archiverAddr && options.archiverPort) ? false : defaultNetwork.startSeedNodeServer,
+      monitorServerPort: (options.monitorPort) ? Number(options.monitorPort) : defaultNetwork.monitorServerPort,
+      monitorServerAddr: (options.monitorAddr) ? options.monitorAddr : defaultNetwork.monitorServerAddr,
+      startMonitorServer: (options.monitorAddr && options.monitorPort) ? false : defaultNetwork.startMonitorServer,
+      startExplorerServer: (options.monitorAddr && options.monitorPort) ? false : defaultNetwork.startExplorerServer,
+      explorerServerPort: defaultNetwork.explorerServerPort,
+      logSize: (options.logSizeMb) ? options.logSizeMb : defaultNetwork.logSize,
+      logNum: (options.logNum) ? options.logNum : defaultNetwork.logNum
+    }
+    if (options['autoIp']) config.autoIp = true
+    await create(networkDir, config)
     if (!options['noLogRotation']) {
       await util.pm2InstallRotateLog(networkDir)
       await util.pm2SetRotateLog(networkDir, options.logSizeMb, options.logSize)
