@@ -6,12 +6,16 @@ module.exports = {
   lowestPort: 9001,
   highestPort: 9001,
   instancesPath: 'instances',
-  seedNodeServerPort: 4000,
-  seedNodeServerAddr: '127.0.0.1',
-  startSeedNodeServer: true,
-  monitorServerPort: 3000,
-  monitorServerAddr: '127.0.0.1',
-  startMonitorServer: true,
+  archivers: `[
+    {
+      "ip": "127.0.0.1",
+      "port": 4000,
+      "publicKey": "758b1c119412298802cd28dbfa394cdfeecc4074492d60844cc192d632d84de3"
+    }
+  ]`,
+  startArchiver: true,
+  monitor: 'http://127.0.0.1:3000/api',
+  startMonitor: true,
   explorerServerPort: 4444,
   explorerServerAddr: '127.0.0.1',
   startExplorerServer: true,

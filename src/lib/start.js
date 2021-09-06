@@ -27,10 +27,10 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
       let newArchiverCount = parseInt(options.archivers)
       if (newArchiverCount > 9) newArchiverCount = 9
       for (let i = 0; i < newArchiverCount; i++) {
-        await util.pm2Start(networkDir, require.resolve('archive-server', { paths: [process.cwd()] }), `archive-server-${i + 1 + existingArchivers.length}`, { ARCHIVER_PORT: networkConfig.seedNodeServerPort + existingArchivers.length + i, ARCHIVER_PUBLIC_KEY: archiverKeys[existingArchivers.length + i].publicKey, ARCHIVER_SECRET_KEY: archiverKeys[existingArchivers.length + i].secretKey, ARCHIVER_EXISTING: JSON.stringify(existingArchivers), ARCHIVER_DB: `archiver-db-${archiverKeys[existingArchivers.length + i].port}` }, pm2Args)
+        await util.pm2Start(networkDir, require.resolve('archive-server', { paths: [process.cwd()] }), `archive-server-${i + 1 + existingArchivers.length}`, { ARCHIVER_PORT: networkConfig.archivers.port + existingArchivers.length + i, ARCHIVER_PUBLIC_KEY: archiverKeys[existingArchivers.length + i].publicKey, ARCHIVER_SECRET_KEY: archiverKeys[existingArchivers.length + i].secretKey, ARCHIVER_EXISTING: JSON.stringify(existingArchivers), ARCHIVER_DB: `archiver-db-${archiverKeys[existingArchivers.length + i].port}` }, pm2Args)
       }
       for (let i = 1; i <= newArchiverCount; i++) {
-        existingArchivers.push({ ip: '127.0.0.1', port: networkConfig.seedNodeServerPort + i, publicKey: archiverKeys[i] })
+        existingArchivers.push({ ip: networkConfig.archivers.ip, port: networkConfig.archivers.port + i, publicKey: archiverKeys[i] })
       }
       networkConfig.existingArchivers = existingArchivers
       shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)
@@ -38,17 +38,17 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
     }
 
     // Start archiver and monitor
-    if (networkConfig.startSeedNodeServer) {
+    if (networkConfig.startArchiver) {
 
-      await util.pm2Start(networkDir, require.resolve('archive-server', { paths: [process.cwd()] }), `archive-server-1`, { ARCHIVER_PORT: networkConfig.seedNodeServerPort, ARCHIVER_PUBLIC_KEY: archiverKeys[0].publicKey, ARCHIVER_SECRET_KEY: archiverKeys[0].secretKey, ARCHIVER_EXISTING: '[]', ARCHIVER_DB: `archiver-db-${archiverKeys[0].port}` }, pm2Args)
+      await util.pm2Start(networkDir, require.resolve('archive-server', { paths: [process.cwd()] }), `archive-server-1`, { ARCHIVER_PORT: networkConfig.archivers.port, ARCHIVER_PUBLIC_KEY: archiverKeys[0].publicKey, ARCHIVER_SECRET_KEY: archiverKeys[0].secretKey, ARCHIVER_EXISTING: '[]', ARCHIVER_DB: `archiver-db-${archiverKeys[0].port}` }, pm2Args)
 
-      let existingArchivers = [{ ip: '127.0.0.1', port: networkConfig.seedNodeServerPort, publicKey: archiverKeys[0] }]
+      let existingArchivers = [{ ip: networkConfig.archivers.ip, port: networkConfig.archivers.port, publicKey: archiverKeys[0] }]
       networkConfig.existingArchivers = existingArchivers
-      networkConfig.startSeedNodeServer = false
+      networkConfig.startArchiver = false
     }
-    if (networkConfig.startMonitorServer) {
-      await util.pm2Start(networkDir, require.resolve('monitor-server', { paths: [process.cwd()] }), 'monitor-server', { PORT: networkConfig.monitorServerPort }, pm2Args)
-      networkConfig.startMonitorServer = false
+    if (networkConfig.startMonitor) {
+      await util.pm2Start(networkDir, require.resolve('monitor-server', { paths: [process.cwd()] }), 'monitor-server', { PORT: new URL(networkConfig.monitor).port }, pm2Args)
+      networkConfig.startMonitor = false
     }
     if (networkConfig.startExplorerServer) {
       await util.pm2Start(networkDir, require.resolve('explorer-server', { paths: [process.cwd()] }), 'explorer-server', { PORT: networkConfig.explorerServerPort }, pm2Args)
@@ -87,6 +87,6 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
 
   console.log()
   console.log('\x1b[33m%s\x1b[0m', 'View network monitor at:') // Yellow
-  console.log('  http://localhost:\x1b[32m%s\x1b[0m', networkConfig.monitorServerPort) // Green
+  console.log('  http://localhost:\x1b[32m%s\x1b[0m', new URL(networkConfig.monitor).port) // Green
   console.log()
 }

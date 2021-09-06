@@ -20,8 +20,8 @@ module.exports = async function (networkDir, num) {
   } else {
     util.pm2Stop(networkDir, 'all')
     networkConfig.runningPorts = []
-    networkConfig.startSeedNodeServer = true
-    networkConfig.startMonitorServer = true
+    networkConfig.startArchiver = true
+    networkConfig.startMonitor = true
     networkConfig.startExplorerServer = true
   }
   shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)

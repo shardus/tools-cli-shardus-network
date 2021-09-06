@@ -80,65 +80,76 @@ const getQuestions = (options) => {
       },
     },
     {
-      // Whether starts or not the seed node server locally
-      default: defaultNetwork.startSeedNodeServer,
-      name: 'startSeedNodeServer',
+      // Whether or not to start an archiver locally
+      default: defaultNetwork.startArchiver,
+      name: 'startArchiver',
       type: 'confirm',
-      message: 'Do you want to run a archive-server instance locally ?',
+      message: 'Do you want to run an archiver instance locally ?',
       validate: notNull,
     },
     {
-      // If yes, just ask in which port it'll run
-      default: defaultNetwork.seedNodeServerPort,
-      name: 'seedNodeServerPort',
-      message: 'Which port do you want to run the archive-server ?',
-      validate: isNumber,
-      when: (answers) => answers.startSeedNodeServer,
-    },
-    {
-      // If not running seed node server locally, asks for its address and port
-      default: defaultNetwork.seedNodeServerAddr,
-      name: 'seedNodeServerAddr',
-      message: "What's the archive-server address ?",
+      // If starting an archiver locally, ask which port it'll run on
+      when: (answers) => answers.startArchiver,
+      default: JSON.parse(defaultNetwork.archivers)[0].port,
+      name: 'archivers',
+      message: 'Which port do you want to run the archiver instance on?',
       validate: notNull,
-      when: (answers) => !answers.startSeedNodeServer,
+      filter: (input, answers) => {
+        const archiversArray = JSON.parse(defaultNetwork.archivers)
+        archiversArray[0].port = Number(input)
+        return JSON.stringify(archiversArray)
+      }
     },
     {
-      default: defaultNetwork.seedNodeServerPort,
-      name: 'seedNodeServerPort',
-      message: "What's the archive-server port ?",
-      validate: isNumber,
-      when: (answers) => !answers.startSeedNodeServer,
+      // If not running an archiver locally, ask for a list of archivers in JSON format
+      when: (answers) => !answers.startArchiver,
+      default: JSON.stringify(JSON.parse(defaultNetwork.archivers)),
+      name: 'archivers',
+      message: "Enter a JSON formatted list of archivers",
+      validate: (input, answers) => {
+        try {
+          JSON.parse(input)
+          return true
+        } catch (error) {
+          return `Invalid JSON: ${error.message}`
+        }
+      }
     },
     {
-      // Whether starts or not the monitor server locally
-      default: defaultNetwork.startMonitorServer,
-      name: 'startMonitorServer',
+      // Whether or not to start a monitor instance locally
+      default: defaultNetwork.startMonitor,
+      name: 'startMonitor',
       type: 'confirm',
-      message: 'Do you want to run a monitor server instance locally ?',
+      message: 'Do you want to run a monitor instance locally ?',
       validate: notNull,
     },
     {
-      // If yes, just ask in which port it'll run
-      default: defaultNetwork.monitorServerPort,
-      name: 'monitorServerPort',
-      message: 'Which port do you want to run the monitor-server ?',
+      // If starting a monitor locally, ask which port to start it on
+      when: (answers) => answers.startMonitor,
+      default: new URL(defaultNetwork.monitor).port,
+      name: 'monitor',
+      message: 'Which port do you want to run the monitor on ?',
       validate: isNumber,
-      when: (answers) => answers.startMonitorServer,
+      filter: (input, answers) => {
+        const monitorUrl = new URL(defaultNetwork.monitor)
+        monitorUrl.port = input
+        return monitorUrl.toString()
+      }
     },
+    // If not starting a monitor locally, ask what the url of its API is
     {
-      default: defaultNetwork.monitorServerAddr,
-      name: 'monitorServerAddr',
-      message: "What's the monitor-server address?",
-      validate: notNull,
-      when: (answers) => !answers.startMonitorServer,
-    },
-    {
-      default: defaultNetwork.monitorServerPort,
-      name: 'monitorServerPort',
-      message: "What's the monitor-server port ?",
-      validate: isNumber,
-      when: (answers) => !answers.startMonitorServer,
+      when: (answers) => !answers.startMonitor,
+      default: defaultNetwork.monitor,
+      name: 'monitor',
+      message: "Enter a monitor's API URL",
+      validate: (input, answers) => {
+        try {
+          new URL(input)
+          return true
+        } catch (error) {
+          return `Invalid URL`
+        }
+      }
     },
     {
       // Whether starts or not the explorer server locally
@@ -210,16 +221,17 @@ const getQuestions = (options) => {
 }
 
 module.exports = async function (args, options, logger) {
-  // DBG
   const networkDir = options.dir ? path.join(process.cwd(), options.dir) : path.join(process.cwd(), 'instances')
-
   const num = parseInt(args.num)
 
+  // If an instances network directory exists, run create on it
   if (util.checkNetworkFolder(networkDir, true)) {
     const configPath = path.join(networkDir, 'network-config.json')
     const networkConfig = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
     networkConfig.numberOfNodes = num ? num : 10
+
     await create(networkDir, networkConfig, num, args.pm2)
+
     if (!options['noLogRotation']) {
       await util.pm2InstallRotateLog(networkDir)
       await util.pm2SetRotateLog(networkDir)
@@ -227,26 +239,31 @@ module.exports = async function (args, options, logger) {
     if (options['noStart'] === false) {
       start(networkDir, num, 'start', args.pm2)
     }
-  } else if (args.num) {
+  }
+  // If an arg for num of nodes is given, start a network w/default configs
+  else if (args.num) {
+    // Use the default configuration
     const config = {
       serverPath: serverPath,
       instancesPath: networkDir,
       numberOfNodes: num,
       startingExternalPort: defaultNetwork.startingExternalPort,
       startingInternalPort: defaultNetwork.startingInternalPort,
-      seedNodeServerPort: (options.archiverPort) ? Number(options.archiverPort) : defaultNetwork.seedNodeServerPort,
-      seedNodeServerAddr: (options.archiverAddr) ? options.archiverAddr : defaultNetwork.seedNodeServerAddr,
-      startSeedNodeServer: (options.archiverAddr && options.archiverPort) ? false : defaultNetwork.startSeedNodeServer,
-      monitorServerPort: (options.monitorPort) ? Number(options.monitorPort) : defaultNetwork.monitorServerPort,
-      monitorServerAddr: (options.monitorAddr) ? options.monitorAddr : defaultNetwork.monitorServerAddr,
-      startMonitorServer: (options.monitorAddr && options.monitorPort) ? false : defaultNetwork.startMonitorServer,
-      startExplorerServer: (options.monitorAddr && options.monitorPort) ? false : defaultNetwork.startExplorerServer,
+      archivers: defaultNetwork.archivers,
+      startArchiver: defaultNetwork.startArchiver,
+      monitor: defaultNetwork.monitor,
+      startMonitor: defaultNetwork.startMonitor,
+      // If we were given an archivers list and/or a monitor url, don't start an explorer
+      startExplorerServer: (options.archivers || options.monitor) ? false : defaultNetwork.startExplorerServer,
       explorerServerPort: defaultNetwork.explorerServerPort,
       logSize: (options.logSizeMb) ? options.logSizeMb : defaultNetwork.logSize,
       logNum: (options.logNum) ? options.logNum : defaultNetwork.logNum
     }
+
     if (options['autoIp']) config.autoIp = true
+
     await create(networkDir, config)
+
     if (!options['noLogRotation']) {
       await util.pm2InstallRotateLog(networkDir)
       await util.pm2SetRotateLog(networkDir, options.logSizeMb, options.logSize)
@@ -254,7 +271,9 @@ module.exports = async function (args, options, logger) {
     if (options['noStart'] === false) {
       start(networkDir, num, 'create', args.pm2, options)
     }
-  } else {
+  }
+  // Otherwise, use a questionnaire to get configs
+  else {
     const questions = getQuestions(options)
     inquirer.prompt(questions).then(async (answers) => {
       await create(networkDir, answers)

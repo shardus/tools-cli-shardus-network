@@ -20,14 +20,8 @@ module.exports = async function (networkDir, configs) {
   }
   shell.cd(networkDir)
   const serverConfig = _.cloneDeep(defaultServerConfig)
-  serverConfig.server.p2p.existingArchivers = [
-    {
-      "ip": networkConfig.seedNodeServerAddr,
-      "port": networkConfig.seedNodeServerPort,
-      "publicKey": "758b1c119412298802cd28dbfa394cdfeecc4074492d60844cc192d632d84de3"
-    }
-  ]
-  serverConfig.server.reporting.recipient = `http://${networkConfig.monitorServerAddr}:${networkConfig.monitorServerPort}/api`
+  serverConfig.server.p2p.existingArchivers = networkConfig.archivers
+  serverConfig.server.reporting.recipient = networkConfig.monitor
   if (networkConfig.autoIp) {
     serverConfig.server.ip.externalIp = 'auto'
     serverConfig.server.ip.internalIp = 'auto'
