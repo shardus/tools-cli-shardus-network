@@ -6,7 +6,8 @@ module.exports = {
   lowestPort: 9001,
   highestPort: 9001,
   instancesPath: 'instances',
-  archivers: `[
+  archivers: 1,
+  existingArchivers: `[
     {
       "ip": "127.0.0.1",
       "port": 4000,
@@ -14,7 +15,7 @@ module.exports = {
     }
   ]`,
   startArchiver: true,
-  monitor: 'http://127.0.0.1:3000/api',
+  monitorUrl: 'http://127.0.0.1:3000/api',
   startMonitor: true,
   explorerServerPort: 4444,
   explorerServerAddr: '127.0.0.1',

@@ -250,11 +250,12 @@ module.exports = async function (args, options, logger) {
       startingExternalPort: defaultNetwork.startingExternalPort,
       startingInternalPort: defaultNetwork.startingInternalPort,
       archivers: defaultNetwork.archivers,
-      startArchiver: defaultNetwork.startArchiver,
-      monitor: defaultNetwork.monitor,
-      startMonitor: defaultNetwork.startMonitor,
+      existingArchivers: options.existingArchivers ? options.existingArchivers : defaultNetwork.existingArchivers,
+      startArchiver: options.existingArchivers ? false : defaultNetwork.startArchiver,
+      monitorUrl: options.monitorUrl ? options.monitorUrl : defaultNetwork.monitorUrl,
+      startMonitor: options.monitorUrl ? false : defaultNetwork.startMonitor,
       // If we were given an archivers list and/or a monitor url, don't start an explorer
-      startExplorerServer: (options.archivers || options.monitor) ? false : defaultNetwork.startExplorerServer,
+      startExplorerServer: (options.existingArchivers || options.monitorUrl) ? false : defaultNetwork.startExplorerServer,
       explorerServerPort: defaultNetwork.explorerServerPort,
       logSize: (options.logSizeMb) ? options.logSizeMb : defaultNetwork.logSize,
       logNum: (options.logNum) ? options.logNum : defaultNetwork.logNum

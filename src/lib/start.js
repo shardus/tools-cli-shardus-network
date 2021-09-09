@@ -23,36 +23,81 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
 
   try {
     if (options.archivers) {
-      let existingArchivers = [...networkConfig.existingArchivers]
+      const existingArchivers = JSON.parse(networkConfig.existingArchivers)
       let newArchiverCount = parseInt(options.archivers)
       if (newArchiverCount > 9) newArchiverCount = 9
+
+      // Start new archivers on ports following existingArchivers
       for (let i = 0; i < newArchiverCount; i++) {
-        await util.pm2Start(networkDir, require.resolve('archive-server', { paths: [process.cwd()] }), `archive-server-${i + 1 + existingArchivers.length}`, { ARCHIVER_PORT: networkConfig.archivers.port + existingArchivers.length + i, ARCHIVER_PUBLIC_KEY: archiverKeys[existingArchivers.length + i].publicKey, ARCHIVER_SECRET_KEY: archiverKeys[existingArchivers.length + i].secretKey, ARCHIVER_EXISTING: JSON.stringify(existingArchivers), ARCHIVER_DB: `archiver-db-${archiverKeys[existingArchivers.length + i].port}` }, pm2Args)
+        await util.pm2Start(
+          networkDir,
+          require.resolve('archive-server', { paths: [process.cwd()] }),
+          `archive-server-${i + 1 + existingArchivers.length}`,
+          {
+            ARCHIVER_PORT: existingArchivers[0].port + existingArchivers.length + i,
+            ARCHIVER_PUBLIC_KEY: archiverKeys[existingArchivers.length + i].publicKey,
+            ARCHIVER_SECRET_KEY: archiverKeys[existingArchivers.length + i].secretKey,
+            ARCHIVER_EXISTING: existingArchivers[0],
+            ARCHIVER_DB: `archiver-db-${archiverKeys[existingArchivers.length + i].port}`
+          },
+          pm2Args
+        )
       }
+
+      // Add the newly started archivers to network-config.json existingArchivers
       for (let i = 1; i <= newArchiverCount; i++) {
-        existingArchivers.push({ ip: networkConfig.archivers.ip, port: networkConfig.archivers.port + i, publicKey: archiverKeys[i] })
+        existingArchivers.push({ ip: existingArchivers[0].ip, port: existingArchivers[0].port + i, publicKey: archiverKeys[i] })
       }
+
       networkConfig.existingArchivers = existingArchivers
       shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)
+
       return
     }
 
-    // Start archiver and monitor
+    // Start archiver
     if (networkConfig.startArchiver) {
+      const existingArchivers = JSON.parse(networkConfig.existingArchivers)
 
-      await util.pm2Start(networkDir, require.resolve('archive-server', { paths: [process.cwd()] }), `archive-server-1`, { ARCHIVER_PORT: networkConfig.archivers.port, ARCHIVER_PUBLIC_KEY: archiverKeys[0].publicKey, ARCHIVER_SECRET_KEY: archiverKeys[0].secretKey, ARCHIVER_EXISTING: '[]', ARCHIVER_DB: `archiver-db-${archiverKeys[0].port}` }, pm2Args)
+      await util.pm2Start(
+        networkDir,
+        require.resolve('archive-server', { paths: [process.cwd()] }),
+        `archive-server-1`,
+        {
+          ARCHIVER_PORT: existingArchivers[0].port,
+          ARCHIVER_PUBLIC_KEY: archiverKeys[0].publicKey,
+          ARCHIVER_SECRET_KEY: archiverKeys[0].secretKey,
+          ARCHIVER_EXISTING: '[]',
+          ARCHIVER_DB: `archiver-db-${archiverKeys[0].port}`
+        },
+        pm2Args
+      )
 
-      let existingArchivers = [{ ip: networkConfig.archivers.ip, port: networkConfig.archivers.port, publicKey: archiverKeys[0] }]
-      networkConfig.existingArchivers = existingArchivers
-      networkConfig.startArchiver = false
+      networkConfig.startArchiver = false // Prevent this code from running twice
     }
+
+    // Start monitor
     if (networkConfig.startMonitor) {
-      await util.pm2Start(networkDir, require.resolve('monitor-server', { paths: [process.cwd()] }), 'monitor-server', { PORT: new URL(networkConfig.monitor).port }, pm2Args)
-      networkConfig.startMonitor = false
+      await util.pm2Start(
+        networkDir,
+        require.resolve('monitor-server', { paths: [process.cwd()] }),
+        'monitor-server',
+        { PORT: new URL(networkConfig.monitorUrl).port },
+        pm2Args
+      )
+      networkConfig.startMonitor = false // Prevent this code from running twice
     }
+
+    // Start explorer
     if (networkConfig.startExplorerServer) {
-      await util.pm2Start(networkDir, require.resolve('explorer-server', { paths: [process.cwd()] }), 'explorer-server', { PORT: networkConfig.explorerServerPort }, pm2Args)
-      networkConfig.startExplorerServer = false
+      await util.pm2Start(
+        networkDir,
+        require.resolve('explorer-server', { paths: [process.cwd()] }),
+        'explorer-server',
+        { PORT: networkConfig.explorerServerPort },
+        pm2Args
+      )
+      networkConfig.startExplorerServer = false // Prevent this code from running twice
     }
     // if (networkConfig.startExplorerClient) {
     //   await util.pm2Start(networkDir, require.resolve('explorer-client', { paths: [process.cwd()] }), 'explorer-client', { PORT: networkConfig.explorerClientPort }, pm2Args)
@@ -87,6 +132,6 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
 
   console.log()
   console.log('\x1b[33m%s\x1b[0m', 'View network monitor at:') // Yellow
-  console.log('  http://localhost:\x1b[32m%s\x1b[0m', new URL(networkConfig.monitor).port) // Green
+  console.log('  http://localhost:\x1b[32m%s\x1b[0m', new URL(networkConfig.monitorUrl).port) // Green
   console.log()
 }
