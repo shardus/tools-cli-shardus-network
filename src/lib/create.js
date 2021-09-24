@@ -20,7 +20,7 @@ module.exports = async function (networkDir, configs) {
   }
   shell.cd(networkDir)
   const serverConfig = _.cloneDeep(defaultServerConfig)
-  serverConfig.server.p2p.existingArchivers = networkConfig.existingArchivers
+  serverConfig.server.p2p.existingArchivers = JSON.parse(networkConfig.existingArchivers)
   serverConfig.server.reporting.recipient = networkConfig.monitorUrl
   if (networkConfig.autoIp) {
     serverConfig.server.ip.externalIp = 'auto'
