@@ -37,7 +37,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
             ARCHIVER_PORT: existingArchivers[0].port + existingArchivers.length + i,
             ARCHIVER_PUBLIC_KEY: archiverKeys[existingArchivers.length + i].publicKey,
             ARCHIVER_SECRET_KEY: archiverKeys[existingArchivers.length + i].secretKey,
-            ARCHIVER_EXISTING: existingArchivers[0],
+            ARCHIVER_EXISTING: JSON.stringify(existingArchivers),
             ARCHIVER_DB: `archiver-db-${archiverKeys[existingArchivers.length + i].port}`
           },
           pm2Args
@@ -46,10 +46,9 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
 
       // Add the newly started archivers to network-config.json existingArchivers
       for (let i = 1; i <= newArchiverCount; i++) {
-        existingArchivers.push({ ip: existingArchivers[0].ip, port: existingArchivers[0].port + i, publicKey: archiverKeys[i] })
+        existingArchivers.push({ ip: existingArchivers[0].ip, port: existingArchivers[0].port + existingArchivers.length , publicKey: archiverKeys[existingArchivers.length].publicKey })
       }
-
-      networkConfig.existingArchivers = existingArchivers
+      networkConfig.existingArchivers = JSON.stringify(existingArchivers)
       shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)
 
       return
