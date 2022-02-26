@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.com/shardus/tools/shardus-network"
+    "url": "git@gitlab.com:shardus/tools/shardus-network.git"
   },
   "bin": {
     "shardus-network": "./bin/index.js"
