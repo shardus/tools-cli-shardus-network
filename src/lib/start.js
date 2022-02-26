@@ -31,7 +31,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
       for (let i = 0; i < newArchiverCount; i++) {
         await util.pm2Start(
           networkDir,
-          require.resolve('archive-server', { paths: [process.cwd()] }),
+          require.resolve('@shardus/archiver', { paths: [process.cwd()] }),
           `archive-server-${i + 1 + existingArchivers.length}`,
           {
             ARCHIVER_PORT: existingArchivers[0].port + existingArchivers.length + i,
@@ -46,7 +46,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
 
       // Add the newly started archivers to network-config.json existingArchivers
       for (let i = 1; i <= newArchiverCount; i++) {
-        existingArchivers.push({ ip: existingArchivers[0].ip, port: existingArchivers[0].port + existingArchivers.length , publicKey: archiverKeys[existingArchivers.length].publicKey })
+        existingArchivers.push({ ip: existingArchivers[0].ip, port: existingArchivers[0].port + existingArchivers.length, publicKey: archiverKeys[existingArchivers.length].publicKey })
       }
       networkConfig.existingArchivers = JSON.stringify(existingArchivers)
       shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)
@@ -60,7 +60,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
 
       await util.pm2Start(
         networkDir,
-        require.resolve('archive-server', { paths: [process.cwd()] }),
+        require.resolve('@shardus/archiver', { paths: [process.cwd()] }),
         `archive-server-1`,
         {
           ARCHIVER_PORT: existingArchivers[0].port,
@@ -79,7 +79,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
     if (networkConfig.startMonitor) {
       await util.pm2Start(
         networkDir,
-        require.resolve('monitor-server', { paths: [process.cwd()] }),
+        require.resolve('@shardus/monitor-server', { paths: [process.cwd()] }),
         'monitor-server',
         { PORT: new URL(networkConfig.monitorUrl).port },
         pm2Args
@@ -91,7 +91,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
     if (networkConfig.startExplorerServer) {
       await util.pm2Start(
         networkDir,
-        require.resolve('explorer-server', { paths: [process.cwd()] }),
+        require.resolve('@shardus/explorer-server', { paths: [process.cwd()] }),
         'explorer-server',
         { PORT: networkConfig.explorerServerPort },
         pm2Args
