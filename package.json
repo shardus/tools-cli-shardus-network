@@ -1,9 +1,10 @@
 {
-  "name": "shardus-network",
+  "name": "@shardus/network-tool",
   "version": "4.2.2",
   "description": "Tool for managing a Shardus test network",
   "main": "index.js",
   "scripts": {
+    "release": "np --no-tests --no-yarn",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -23,7 +24,11 @@
     "pm2": "git+https://github.com/theDigg/pm2#count-exit-errors",
     "shelljs": "^0.8.3"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
+    "np": "^7.6.0",
     "standard": "^13.1.0"
   }
 }
