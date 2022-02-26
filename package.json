@@ -20,7 +20,7 @@
     "execa": "^3.2.0",
     "inquirer": "^6.3.1",
     "lodash": "^4.17.15",
-    "pm2": "git+https://github.com/kshifflett707/pm2.git#count-exit-errors",
+    "pm2": "git+https://github.com/theDigg/pm2#count-exit-errors",
     "shelljs": "^0.8.3"
   },
   "devDependencies": {
