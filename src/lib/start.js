@@ -91,7 +91,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
     if (networkConfig.startExplorerServer) {
       await util.pm2Start(
         networkDir,
-        require.resolve('@shardus/explorer-server', { paths: [process.cwd()] }),
+        require.resolve('explorer-server', { paths: [process.cwd()] }),
         'explorer-server',
         { PORT: networkConfig.explorerServerPort },
         pm2Args
