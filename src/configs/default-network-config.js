@@ -19,7 +19,7 @@ module.exports = {
   startMonitor: true,
   explorerServerPort: 4444,
   explorerServerAddr: '127.0.0.1',
-  startExplorerServer: true,
+  startExplorerServer: false,
   logSize: 10,
   logNum: 10
   // explorerClientPort: 5001,

@@ -13,6 +13,14 @@ const pm2Start = async (networkDir, script, name, env = {}, pm2Args = []) => {
   await execa.command(execaCmd, { cwd: networkDir, env, stdio: [0, 1, 2] })
 }
 
+const pm2Restart = async (networkDir, name, env = {}) => {
+  env.PM2_HOME = path.join(networkDir, '.pm2/')
+  // const parsedPm2Args = pm2Args.map((arg) => arg.split('pm2')[1] || arg).join(' ')
+  const execaCmd = `${pm2} restart ${name} --update-env`
+  console.log('pm2Restart', execaCmd, env)
+  await execa.command(execaCmd, { cwd: networkDir, env, stdio: [0, 1, 2] })
+}
+
 const pm2Stop = async (networkDir, arg, env = {}) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
   await execa.command(`${pm2} stop ${arg}`, {
@@ -139,6 +147,7 @@ const setNetworkDirOrErr = (dir) => {
 
 module.exports = {
   pm2Start,
+  pm2Restart,
   pm2Stop,
   pm2Kill,
   pm2Reset,

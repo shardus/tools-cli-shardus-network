@@ -47,6 +47,17 @@ const register = {
       .argument('[num]', 'Number of nodes to stop inside of [network_dir]')
       .action(actions.stop)
   },
+  restart(prog, namespace) {
+    prog
+      .command(`${namespace ? namespace + ' ' : ''}restart-net`, 'Restart nodes or archivers')
+      .alias('restart')
+      // .argument('[network_dir]', 'The directory to stop the nodes from')
+      .option('-a, --archivers <archivers_count>', 'Number of archivers to restart')
+      .option('-n, --num <num>', 'Number of nodes to restart inside of [network_dir]')
+      .option('-d, --dir <network_dir>', 'The directory to stop the nodes from')
+      .argument('[num]', 'Number of nodes to restart inside of [network_dir]')
+      .action(actions.restart)
+  },
   clean(prog, namespace) {
     prog
       .command(`${namespace ? namespace + ' ' : ''}clean-net`, 'Clean the state of all instances in a test net')
