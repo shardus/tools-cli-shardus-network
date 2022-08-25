@@ -5,5 +5,5 @@ const fs = require('fs')
 
 module.exports = function (args, options, logger) {
   const networkDir = util.setNetworkDirOrErr(options.dir)
-  stop(networkDir, args.num)
+  stop(networkDir, args.num, options)
 }

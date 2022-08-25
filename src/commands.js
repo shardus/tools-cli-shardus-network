@@ -43,6 +43,7 @@ const register = {
       .alias('stop')
       // .argument('[network_dir]', 'The directory to stop the nodes from')
       // .option('-n, --num <num>', 'Number of nodes to stop inside of [network_dir]')
+      .option('-a, --archivers <archivers_count>', 'Number of archivers to stop')
       .option('-d, --dir <network_dir>', 'The directory to stop the nodes from')
       .argument('[num]', 'Number of nodes to stop inside of [network_dir]')
       .action(actions.stop)
