@@ -18,15 +18,18 @@ module.exports = async function (networkDir, num, options) {
     else
       stoppedArchivers = []
 
+    let stoppedArchiversCount = stoppedArchivers.length
+
     if (existingArchivers.length > stopArchiverCount) {
       const activeArchivers = existingArchivers.slice(stopArchiverCount, existingArchivers.length)
       // Stop archivers on ports following existingArchivers
       for (let i = 0; i < stopArchiverCount; i++) {
         await util.pm2Stop(
           networkDir,
-          `"archive-server-${i + 1}"`
+          `"archive-server-${stoppedArchiversCount + 1}"`
         )
         stoppedArchivers.push(existingArchivers[i])
+        stoppedArchiversCount++
       }
       activeArchivers.sort((a, b) => a.port - b.port)
       networkConfig.existingArchivers = JSON.stringify(activeArchivers)
