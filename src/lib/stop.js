@@ -35,6 +35,37 @@ module.exports = async function (networkDir, num, options) {
       networkConfig.existingArchivers = JSON.stringify(activeArchivers)
       networkConfig.stoppedArchivers = JSON.stringify(stoppedArchivers)
     }
+  } else if (options.archiverPort) {
+    let archiverPortToStop = parseInt(options.archiverPort)
+    if (!(archiverPortToStop > 4000 && archiverPortToStop < 4010)) {
+      console.log('The archiverPort is invalid')
+      return
+    }
+    let existingArchivers = JSON.parse(networkConfig.existingArchivers)
+
+    let archiverIsInTheList = existingArchivers.filter(archiver => archiver.port === archiverPortToStop)
+    if (archiverIsInTheList.length === 0) {
+      console.log(`The archiver with port ${archiverPortToStop} is not running.`)
+      return
+    }
+    let stoppedArchivers
+    if (networkConfig.stoppedArchivers)
+      stoppedArchivers = JSON.parse(networkConfig.stoppedArchivers)
+    else
+      stoppedArchivers = []
+
+    let archiverIndex = archiverPortToStop % 4000 + 1
+
+    const activeArchivers = existingArchivers.filter(archiver => archiver.port !== archiverPortToStop)
+
+    await util.pm2Stop(
+      networkDir,
+      `"archive-server-${archiverIndex}"`
+    )
+    stoppedArchivers.push(archiverIsInTheList[0])
+    activeArchivers.sort((a, b) => a.port - b.port)
+    networkConfig.existingArchivers = JSON.stringify(activeArchivers)
+    networkConfig.stoppedArchivers = JSON.stringify(stoppedArchivers)
   } else if (num) {
     //for (let port = networkConfig.lowestPort; port <= networkConfig.highestPort; port++) {
     let stoppedConsensors

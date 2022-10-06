@@ -91,9 +91,48 @@ module.exports = async function (networkDir, options, args) {
         activeArchivers = [...activeArchivers, ...newArchiversInfo]
         activeArchivers.sort((a, b) => a.port - b.port)
         stoppedArchivers = newStoppedArchivers
+        stoppedArchivers.sort((a, b) => a.port - b.port)
 
         networkConfig.existingArchivers = JSON.stringify(activeArchivers);
         networkConfig.stoppedArchivers = JSON.stringify(stoppedArchivers);
+    } else if (options.archiverPort) {
+        let archiverPortToRestart = parseInt(options.archiverPort)
+        if (!(archiverPortToRestart > 4000 && archiverPortToRestart < 4010)) {
+            console.log('The archiverPort is invalid')
+            return
+        }
+        let existingArchivers = JSON.parse(networkConfig.existingArchivers)
+        let stoppedArchivers
+        if (networkConfig.stoppedArchivers)
+            stoppedArchivers = JSON.parse(networkConfig.stoppedArchivers)
+        else
+            stoppedArchivers = []
+
+        let archiverIsInActiveList = existingArchivers.filter(archiver => archiver.port === archiverPortToRestart)
+        let archiverIsInStoppedList = stoppedArchivers.filter(archiver => archiver.port === archiverPortToRestart)
+        if (archiverIsInStoppedList.length === 0 && archiverIsInActiveList.length === 0) {
+            console.log(`The archiver with port ${archiverPortToRestart} is not in the running or stopped archiver list.`)
+            return
+        }
+
+        let archiverIndex = archiverPortToRestart % 4000 + 1
+        let archiverKeyIndex = archiverKeys.findIndex(archiver => archiver.port === archiverPortToRestart)
+
+        let activeArchivers = existingArchivers.filter(archiver => archiver.port !== archiverPortToRestart)
+        stoppedArchivers = stoppedArchivers.filter(archiver => archiver.port !== archiverPortToRestart)
+
+        await util.pm2Restart(networkDir, `"archive-server-${archiverIndex}"`, {
+            ARCHIVER_PORT: archiverKeys[archiverKeyIndex].port,
+            ARCHIVER_PUBLIC_KEY: archiverKeys[archiverKeyIndex].publicKey,
+            ARCHIVER_SECRET_KEY: archiverKeys[archiverKeyIndex].secretKey,
+            ARCHIVER_EXISTING: JSON.stringify(activeArchivers),
+            ARCHIVER_DB: `archiver - db - ${archiverKeys[archiverKeyIndex].port}`,
+        });
+        activeArchivers.push({ ip: archiverKeys[archiverKeyIndex].ip, port: archiverKeys[archiverKeyIndex].port, publicKey: archiverKeys[archiverKeyIndex].publicKey })
+        activeArchivers.sort((a, b) => a.port - b.port)
+        stoppedArchivers.sort((a, b) => a.port - b.port)
+        networkConfig.existingArchivers = JSON.stringify(activeArchivers)
+        networkConfig.stoppedArchivers = JSON.stringify(stoppedArchivers)
     } else if (args.num) {
         // const instances = shell.ls('-d', `${instancesPath}/shardus-instance*`)
         // let nodesToStart = num ? num : instances.length
