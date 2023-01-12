@@ -18,6 +18,11 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
     pm2Args.push('pm2--max-restarts=1')
   }
 
+  // Pass PM2 parameter to do a graceful stop on Windows
+  if (process.platform === "win32" && pm2Args.includes('pm2--shutdown-with-message') === false) {
+    pm2Args.push('pm2--shutdown-with-message')
+  }
+
   const instances = shell.ls('-d', `${instancesPath}/shardus-instance*`)
   let nodesToStart = num ? num : instances.length
 
