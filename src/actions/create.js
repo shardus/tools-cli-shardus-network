@@ -223,6 +223,12 @@ const getQuestions = (options) => {
 module.exports = async function (args, options, logger) {
   const networkDir = options.dir ? path.join(process.cwd(), options.dir) : path.join(process.cwd(), 'instances')
   const num = parseInt(args.num)
+  const startingExternalPort = options.startingExternalPort
+    ? parseInt(options.startingExternalPort)
+    : defaultNetwork.startingExternalPort;
+  const startingInternalPort = options.startingInternalPort 
+    ? parseInt(options.startingInternalPort) 
+    : defaultNetwork.startingInternalPort;
 
   // If an instances network directory exists, run create on it
   if (util.checkNetworkFolder(networkDir, true)) {
@@ -247,8 +253,8 @@ module.exports = async function (args, options, logger) {
       serverPath: serverPath,
       instancesPath: networkDir,
       numberOfNodes: num,
-      startingExternalPort: defaultNetwork.startingExternalPort,
-      startingInternalPort: defaultNetwork.startingInternalPort,
+      startingExternalPort: startingExternalPort,
+      startingInternalPort: startingInternalPort,
       archivers: defaultNetwork.archivers,
       existingArchivers: options.existingArchivers ? options.existingArchivers : defaultNetwork.existingArchivers,
       startArchiver: options.existingArchivers ? false : defaultNetwork.startArchiver,

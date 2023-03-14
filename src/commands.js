@@ -17,6 +17,8 @@ const register = {
       .option('--auto-ip', 'Makes nodes discover their IP automatically')
       .option('--existing-archivers <archivers>', 'Uses the given JSON list of archivers')
       .option('--monitor-url <monitor>', 'Uses the given monitor API URL')
+      .option('--starting-external-port <startingExternalPort>', 'The starting external port number. Defaults to 9001')
+      .option('--starting-internal-port <startingInternalPort>', 'The starting internal port number. Defaults to 10001')
       .argument('[num]', 'Number of nodes to create inside of [network_dir]')
       .argument('[pm2...]', "Additional arguments/flags to pass to PM2. Prefix them with 'pm2' e.g., 'pm2--no-autorestart' ")
       .action(actions.create)
