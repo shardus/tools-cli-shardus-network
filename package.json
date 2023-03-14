@@ -1,6 +1,6 @@
 {
   "name": "@shardus/network-tool",
-  "version": "4.2.4",
+  "version": "4.3.0",
   "description": "Tool for managing a Shardus test network",
   "main": "index.js",
   "scripts": {
