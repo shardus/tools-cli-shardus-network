@@ -2,6 +2,7 @@ const { create } = require('../lib')
 const inquirer = require('inquirer')
 const fs = require('fs')
 const defaultNetwork = require('../configs/default-network-config')
+const defaultArchivers = require('../configs/default-archiver-config')
 const path = require('path')
 const { start } = require('../lib')
 const util = require('../lib/util')
@@ -256,12 +257,12 @@ module.exports = async function (args, options, logger) {
       startingExternalPort: startingExternalPort,
       startingInternalPort: startingInternalPort,
       archivers: defaultNetwork.archivers,
-      existingArchivers: options.existingArchivers ? options.existingArchivers : defaultNetwork.existingArchivers,
+      existingArchivers: options.existingArchivers ? options.existingArchivers : defaultArchivers.archivers,
       startArchiver: options.existingArchivers ? false : defaultNetwork.startArchiver,
       monitorUrl: options.monitorUrl ? options.monitorUrl : defaultNetwork.monitorUrl,
       startMonitor: options.monitorUrl ? false : defaultNetwork.startMonitor,
       // If we were given an archivers list and/or a monitor url, don't start an explorer
-      startExplorerServer: (options.existingArchivers || options.monitorUrl) ? false : defaultNetwork.startExplorerServer,
+      startExplorerServer: (options.archivers || options.monitorUrl) ? false : defaultNetwork.startExplorerServer,
       explorerServerPort: defaultNetwork.explorerServerPort,
       logSize: (options.logSizeMb) ? options.logSizeMb : defaultNetwork.logSize,
       logNum: (options.logNum) ? options.logNum : defaultNetwork.logNum

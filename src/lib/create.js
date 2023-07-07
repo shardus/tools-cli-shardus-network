@@ -1,5 +1,6 @@
 const defaultNetworkConfig = require('../configs/default-network-config.js')
 const defaultServerConfig = require('../configs/default-server-config')
+const defaultArchiverConfig = require('../configs/default-archiver-config')
 const fs = require('fs')
 const path = require('path')
 const shell = require('shelljs')
@@ -20,12 +21,12 @@ module.exports = async function (networkDir, configs) {
   }
   shell.cd(networkDir)
   const serverConfig = _.cloneDeep(defaultServerConfig)
-  serverConfig.server.p2p.existingArchivers = JSON.parse(networkConfig.existingArchivers)
   serverConfig.server.reporting.recipient = networkConfig.monitorUrl
   if (networkConfig.autoIp) {
     serverConfig.server.ip.externalIp = 'auto'
     serverConfig.server.ip.internalIp = 'auto'
-  }
+  }  
+  serverConfig.archivers = configs.existingArchivers ? JSON.parse(configs.existingArchivers ): defaultArchiverConfig.archivers
 
   let highestExternalPort = networkConfig.highestPort || networkConfig.startingExternalPort
   let offset = highestExternalPort > networkConfig.startingExternalPort ? 1 : 0
