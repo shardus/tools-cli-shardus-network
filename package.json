@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "release": "np --no-tests --no-yarn",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint",
+    "format-check": "prettier --check '**.js'"
   },
   "repository": {
     "type": "git",
@@ -22,13 +24,17 @@
     "inquirer": "^6.3.1",
     "lodash": "^4.17.15",
     "pm2": "git+https://github.com/theDigg/pm2#count-exit-errors",
-    "shelljs": "^0.8.3"
+    "shelljs": "^0.8.3",
+    "eslint": "^8.43.0"
   },
   "publishConfig": {
     "access": "public"
   },
   "devDependencies": {
     "np": "^7.6.0",
-    "standard": "^13.1.0"
+    "standard": "^13.1.0",
+    "eslint-config-prettier": "^8.8.0",
+    "eslint-plugin-security": "^1.7.1",
+    "prettier": "^2.7.1"
   }
 }

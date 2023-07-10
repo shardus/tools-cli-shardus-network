@@ -1,0 +1,5 @@
+bin/
+index.js
+src/
+prettier.config.js
+test.js

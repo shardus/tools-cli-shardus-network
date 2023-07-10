@@ -1,0 +1,17 @@
+{
+  "root": true,
+  "env": {
+    "node": true
+  },
+  "plugins": ["security"],
+  "extends": ["eslint:recommended", "plugin:security/recommended", "prettier"],
+  "ignorePatterns": [],
+  "rules": {
+    "no-empty": [
+      1,
+      {
+        "allowEmptyCatch": true
+      }
+    ]
+  }
+}
