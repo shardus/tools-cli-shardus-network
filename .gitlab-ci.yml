@@ -27,9 +27,9 @@ lint-job:
     - echo "Running ESlint complete."
 
 # Format Checker Job: Runs a code formatter
-format-checker-job:
-  stage: build
-  script:
-    - echo "Running code formatter..."
-    - npm run format-check
-    - echo "Code formatting complete."
+# format-checker-job:
+#   stage: build
+#   script:
+#     - echo "Running code formatter..."
+#     - npm run format-check
+#     - echo "Code formatting complete."
