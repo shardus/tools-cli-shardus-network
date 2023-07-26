@@ -27,6 +27,7 @@ module.exports = async function (networkDir, options, args) {
         let newArchiversInfo = [];
         let newStoppedArchivers = [...stoppedArchivers]
 
+        let activeArchiversEnv = ''
         if (stoppedArchivers.length > 0) {
             let count = stoppedArchivers.length;
             if (restartArchiverCount <= stoppedArchivers.length) {
@@ -45,6 +46,7 @@ module.exports = async function (networkDir, options, args) {
                     restartArchiverCount,
                     existingArchivers.length
                 );
+                activeArchiversEnv = activeArchivers.map((archiver) => `${archiver.ip}:${archiver.port}:${archiver.publicKey}`).join(',')
                 activeArchiversCalculated = true
             }
 
@@ -56,7 +58,7 @@ module.exports = async function (networkDir, options, args) {
                     ARCHIVER_PORT: stoppedArchivers[i].port,
                     ARCHIVER_PUBLIC_KEY: stoppedArchivers[i].publicKey,
                     ARCHIVER_SECRET_KEY: archiverKeys[port].secretKey,
-                    ARCHIVER_EXISTING: JSON.stringify(activeArchivers),
+                    ARCHIVER_INFO: activeArchiversEnv,
                     ARCHIVER_DB: `archiver - db - ${stoppedArchivers[i].port}`,
                 });
             }
@@ -71,6 +73,8 @@ module.exports = async function (networkDir, options, args) {
                     restartArchiverCount,
                     existingArchivers.length
                 );
+                activeArchivers = ''
+                activeArchiversEnv = activeArchivers.map((archiver) => `${archiver.ip}:${archiver.port}:${archiver.publicKey}`).join(',')
                 activeArchiversCalculated = true
             }
             // Restart archivers on ports following existingArchivers
@@ -82,7 +86,7 @@ module.exports = async function (networkDir, options, args) {
                     ARCHIVER_PORT: existingArchivers[i].port,
                     ARCHIVER_PUBLIC_KEY: existingArchivers[i].publicKey,
                     ARCHIVER_SECRET_KEY: archiverKeys[port].secretKey,
-                    ARCHIVER_EXISTING: JSON.stringify(activeArchivers),
+                    ARCHIVER_INFO: activeArchiversEnv,
                     ARCHIVER_DB: `archiver - db - ${existingArchivers[i].port}`,
                 });
                 port++;
@@ -120,12 +124,13 @@ module.exports = async function (networkDir, options, args) {
 
         let activeArchivers = existingArchivers.filter(archiver => archiver.port !== archiverPortToRestart)
         stoppedArchivers = stoppedArchivers.filter(archiver => archiver.port !== archiverPortToRestart)
+        const activeArchiversEnv = activeArchivers.map((archiver) => `${archiver.ip}:${archiver.port}:${archiver.publicKey}`).join(',')
 
         await util.pm2Restart(networkDir, `"archive-server-${archiverIndex}"`, {
             ARCHIVER_PORT: archiverKeys[archiverKeyIndex].port,
             ARCHIVER_PUBLIC_KEY: archiverKeys[archiverKeyIndex].publicKey,
             ARCHIVER_SECRET_KEY: archiverKeys[archiverKeyIndex].secretKey,
-            ARCHIVER_EXISTING: JSON.stringify(activeArchivers),
+            ARCHIVER_INFO: activeArchiversEnv,
             ARCHIVER_DB: `archiver - db - ${archiverKeys[archiverKeyIndex].port}`,
         });
         activeArchivers.push({ ip: archiverKeys[archiverKeyIndex].ip, port: archiverKeys[archiverKeyIndex].port, publicKey: archiverKeys[archiverKeyIndex].publicKey })

@@ -27,6 +27,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
       let newArchiverCount = parseInt(options.archivers)
       if (newArchiverCount > 9) newArchiverCount = 9
 
+      const existingArchiversEnv = existingArchivers.map((archiver) => `${archiver.ip}:${archiver.port}:${archiver.publicKey}`).join(',')
       // Start new archivers on ports following existingArchivers
       for (let i = 0; i < newArchiverCount; i++) {
         await util.pm2Start(
@@ -37,7 +38,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
             ARCHIVER_PORT: existingArchivers[0].port + existingArchivers.length + i,
             ARCHIVER_PUBLIC_KEY: archiverKeys[existingArchivers.length + i].publicKey,
             ARCHIVER_SECRET_KEY: archiverKeys[existingArchivers.length + i].secretKey,
-            ARCHIVER_EXISTING: JSON.stringify(existingArchivers),
+            ARCHIVER_INFO: existingArchiversEnv,
             ARCHIVER_DB: `archiver-db-${archiverKeys[existingArchivers.length + i].port}`
           },
           pm2Args
@@ -66,7 +67,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
           ARCHIVER_PORT: existingArchivers[0].port,
           ARCHIVER_PUBLIC_KEY: archiverKeys[0].publicKey,
           ARCHIVER_SECRET_KEY: archiverKeys[0].secretKey,
-          ARCHIVER_EXISTING: '[]',
+          ARCHIVER_INFO: '',
           ARCHIVER_DB: `archiver-db-${archiverKeys[0].port}`
         },
         pm2Args
