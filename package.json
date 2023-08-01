@@ -28,7 +28,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "np": "^7.6.0",
+    "np": "8.0.4",
     "standard": "^13.1.0"
   }
 }
