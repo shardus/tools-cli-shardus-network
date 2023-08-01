@@ -78,15 +78,15 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
 
     // Start monitor
     if (networkConfig.startMonitor) {
-      let existingArchivers = JSON.parse(networkConfig.existingArchivers);
-      let archiverEnvInfo = `${existingArchivers[0].ip}:${existingArchivers[0].port}:${archiverKeys[0].publicKey}`;
+      let existingArchivers = JSON.parse(networkConfig.existingArchivers)
+      const existingArchiversEnv = existingArchivers.map((archiver) => `${archiver.ip}:${archiver.port}:${archiver.publicKey}`).join(',')
       await util.pm2Start(
         networkDir,
         require.resolve("@shardus/monitor-server", { paths: [process.cwd()] }),
         "monitor-server",
         {
           PORT: new URL(networkConfig.monitorUrl).port,
-          ARCHIVER_INFO: archiverEnvInfo,
+          ARCHIVER_INFO: existingArchiversEnv,
           NODE_ENV: "debug",
           NAME: "admin",
           PASSWORD: "password",
