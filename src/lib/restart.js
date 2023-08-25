@@ -59,7 +59,7 @@ module.exports = async function (networkDir, options, args) {
                     ARCHIVER_PUBLIC_KEY: stoppedArchivers[i].publicKey,
                     ARCHIVER_SECRET_KEY: archiverKeys[port].secretKey,
                     ARCHIVER_INFO: activeArchiversEnv,
-                    ARCHIVER_DB: `archiver - db - ${stoppedArchivers[i].port}`,
+                    ARCHIVER_DB: `archiver-db-${stoppedArchivers[i].port}`,
                 });
             }
         }
@@ -87,7 +87,7 @@ module.exports = async function (networkDir, options, args) {
                     ARCHIVER_PUBLIC_KEY: existingArchivers[i].publicKey,
                     ARCHIVER_SECRET_KEY: archiverKeys[port].secretKey,
                     ARCHIVER_INFO: activeArchiversEnv,
-                    ARCHIVER_DB: `archiver - db - ${existingArchivers[i].port}`,
+                    ARCHIVER_DB: `archiver-db-${existingArchivers[i].port}`,
                 });
                 port++;
             }
@@ -131,7 +131,7 @@ module.exports = async function (networkDir, options, args) {
             ARCHIVER_PUBLIC_KEY: archiverKeys[archiverKeyIndex].publicKey,
             ARCHIVER_SECRET_KEY: archiverKeys[archiverKeyIndex].secretKey,
             ARCHIVER_INFO: activeArchiversEnv,
-            ARCHIVER_DB: `archiver - db - ${archiverKeys[archiverKeyIndex].port}`,
+            ARCHIVER_DB: `archiver-db-${archiverKeys[archiverKeyIndex].port}`,
         });
         activeArchivers.push({ ip: archiverKeys[archiverKeyIndex].ip, port: archiverKeys[archiverKeyIndex].port, publicKey: archiverKeys[archiverKeyIndex].publicKey })
         activeArchivers.sort((a, b) => a.port - b.port)
