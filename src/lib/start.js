@@ -74,6 +74,8 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
       )
 
       networkConfig.startArchiver = false // Prevent this code from running twice
+
+      await util.sleep(1000) // Add 1sec delay to allow archiver to be ready, so that monitor can connect it with archiver discovery
     }
 
     // Start monitor

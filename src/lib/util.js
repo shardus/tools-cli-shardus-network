@@ -145,6 +145,10 @@ const setNetworkDirOrErr = (dir) => {
   return networkDir
 }
 
+const sleep = (ms) => {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 module.exports = {
   pm2Start,
   pm2Restart,
@@ -158,4 +162,5 @@ module.exports = {
   pm2Exec,
   checkNetworkFolder,
   setNetworkDirOrErr,
+  sleep
 }
