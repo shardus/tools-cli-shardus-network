@@ -22,7 +22,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
   let nodesToStart = num ? num : instances.length
 
   try {
-    if (options.archivers) {
+    if (options && options.archivers) {
       const existingArchivers = JSON.parse(networkConfig.existingArchivers)
       let newArchiverCount = parseInt(options.archivers)
       if (newArchiverCount > 9) newArchiverCount = 9
