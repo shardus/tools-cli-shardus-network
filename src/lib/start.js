@@ -121,7 +121,11 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
     for (let i = 0; i < nodesToStart; i++) {
       if (!networkConfig.runningPorts.includes(networkConfig.lowestPort + i)) {
         if (instances[i]) {
-          await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+          if (options.inspect) {
+            await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, [`pm2--node-args="--inspect=127.0.0.1:${networkConfig.inspectPort + i}"`, ...pm2Args])
+          } else {
+            await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+          }
           networkConfig.runningPorts.push(networkConfig.lowestPort + i)
         }
       } else {
@@ -132,7 +136,11 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
 
   if (type === 'start') {
     for (let i = instances.length - num; i < instances.length; i++) {
-      await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+      if (options.inspect) {
+        await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, [`pm2--node-args="--inspect=127.0.0.1:${networkConfig.inspectPort + i}"`, ...pm2Args])
+      } else {
+        await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+      }
       let port = parseInt(instances[i].split('-').pop())
       networkConfig.runningPorts.push(port)
     }
