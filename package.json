@@ -35,7 +35,8 @@
     "standard": "^13.1.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-security": "^1.7.1",
-    "prettier": "^2.7.1"
+    "prettier": "^2.7.1",
+    "fast-stable-stringify": "1.0.0"
   },
   "overrides": {
     "minimist": "1.2.6",

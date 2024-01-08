@@ -22,7 +22,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
   let nodesToStart = num ? num : instances.length
 
   try {
-    if (options.archivers) {
+    if (options && options.archivers) {
       const existingArchivers = JSON.parse(networkConfig.existingArchivers)
       let newArchiverCount = parseInt(options.archivers)
       if (newArchiverCount > 9) newArchiverCount = 9
@@ -63,9 +63,10 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
         require.resolve('@shardus/archiver', { paths: [process.cwd()] }),
         `archive-server-1`,
         {
+          ARCHIVER_IP: networkConfig.archiverIP,
           ARCHIVER_PORT: existingArchivers[0].port,
-          ARCHIVER_PUBLIC_KEY: archiverKeys[0].publicKey,
-          ARCHIVER_SECRET_KEY: archiverKeys[0].secretKey,
+          ARCHIVER_PUBLIC_KEY: networkConfig.archiverPublicKey,
+          ARCHIVER_SECRET_KEY: networkConfig.archiverSecretKey,
           ARCHIVER_EXISTING: '[]',
           ARCHIVER_DB: `archiver-db-${archiverKeys[0].port}`
         },
