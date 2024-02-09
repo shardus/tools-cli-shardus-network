@@ -27,6 +27,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
       let newArchiverCount = parseInt(options.archivers)
       if (newArchiverCount > 9) newArchiverCount = 9
 
+      const existingArchiversEnv = existingArchivers.map((archiver) => `${archiver.ip}:${archiver.port}:${archiver.publicKey}`).join(',')
       // Start new archivers on ports following existingArchivers
       for (let i = 0; i < newArchiverCount; i++) {
         await util.pm2Start(
@@ -37,7 +38,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
             ARCHIVER_PORT: existingArchivers[0].port + existingArchivers.length + i,
             ARCHIVER_PUBLIC_KEY: archiverKeys[existingArchivers.length + i].publicKey,
             ARCHIVER_SECRET_KEY: archiverKeys[existingArchivers.length + i].secretKey,
-            ARCHIVER_EXISTING: JSON.stringify(existingArchivers),
+            ARCHIVER_INFO: existingArchiversEnv,
             ARCHIVER_DB: `archiver-db-${archiverKeys[existingArchivers.length + i].port}`
           },
           pm2Args
@@ -74,18 +75,28 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
       )
 
       networkConfig.startArchiver = false // Prevent this code from running twice
+
+      await util.sleep(1000) // Add 1sec delay to allow archiver to be ready, so that monitor can connect it with archiver discovery
     }
 
     // Start monitor
     if (networkConfig.startMonitor) {
+      let existingArchivers = JSON.parse(networkConfig.existingArchivers)
+      const existingArchiversEnv = existingArchivers.map((archiver) => `${archiver.ip}:${archiver.port}:${archiver.publicKey}`).join(',')
       await util.pm2Start(
         networkDir,
-        require.resolve('@shardus/monitor-server', { paths: [process.cwd()] }),
-        'monitor-server',
-        { PORT: new URL(networkConfig.monitorUrl).port },
+        require.resolve("@shardus/monitor-server", { paths: [process.cwd()] }),
+        "monitor-server",
+        {
+          PORT: new URL(networkConfig.monitorUrl).port,
+          ARCHIVER_INFO: existingArchiversEnv,
+          NODE_ENV: "debug",
+          NAME: "admin",
+          PASSWORD: "password",
+        },
         pm2Args
-      )
-      networkConfig.startMonitor = false // Prevent this code from running twice
+      );
+      networkConfig.startMonitor = false; // Prevent this code from running twice
     }
 
     // Start explorer
@@ -111,7 +122,11 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
     for (let i = 0; i < nodesToStart; i++) {
       if (!networkConfig.runningPorts.includes(networkConfig.lowestPort + i)) {
         if (instances[i]) {
-          await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+          if (options?.inspect) {
+            await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, [`pm2--node-args="--inspect=127.0.0.1:${networkConfig.inspectPort + i}"`, ...pm2Args])
+          } else {
+            await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+          }
           networkConfig.runningPorts.push(networkConfig.lowestPort + i)
         }
       } else {
@@ -122,7 +137,11 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
 
   if (type === 'start') {
     for (let i = instances.length - num; i < instances.length; i++) {
-      await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+      if (options?.inspect) {
+        await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, [`pm2--node-args="--inspect=127.0.0.1:${networkConfig.inspectPort + i}"`, ...pm2Args])
+      } else {
+        await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+      }
       let port = parseInt(instances[i].split('-').pop())
       networkConfig.runningPorts.push(port)
     }

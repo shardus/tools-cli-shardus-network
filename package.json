@@ -1,6 +1,6 @@
 {
   "name": "@shardus/network-tool",
-  "version": "4.3.0",
+  "version": "4.4.0",
   "description": "Tool for managing a Shardus test network",
   "main": "index.js",
   "scripts": {
@@ -23,6 +23,7 @@
     "execa": "^3.2.0",
     "inquirer": "^6.3.1",
     "lodash": "^4.17.21",
+    "lodash": "^4.17.21",
     "pm2": "git+https://github.com/theDigg/pm2#count-exit-errors",
     "shelljs": "^0.8.5",
     "eslint": "^8.43.0"
@@ -31,7 +32,7 @@
     "access": "public"
   },
   "devDependencies": {
-    "np": "^7.6.0",
+    "np": "8.0.4",
     "standard": "^13.1.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-security": "^1.7.1",

@@ -5,6 +5,7 @@ module.exports = {
   startingInternalPort: 10001,
   lowestPort: 9001,
   highestPort: 9001,
+  inspectPort: 8001,
   instancesPath: 'instances',
   archivers: 1,
   existingArchivers: `[
