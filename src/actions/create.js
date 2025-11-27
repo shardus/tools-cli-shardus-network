@@ -239,8 +239,9 @@ module.exports = async function (args, options, logger) {
     await create(networkDir, networkConfig, num, args.pm2)
 
     if (!options['noLogRotation']) {
-      await util.pm2InstallRotateLog(networkDir)
-      await util.pm2SetRotateLog(networkDir)
+      const logSize = options.logSizeMb || networkConfig.logSize || defaultNetwork.logSize
+      const logNum = options.logNum || networkConfig.logNum || defaultNetwork.logNum
+      await util.pm2SetupLogRotation(networkDir, logSize, logNum)
     }
     if (options['noStart'] === false) {
       start(networkDir, num, 'start', args.pm2)
@@ -272,8 +273,7 @@ module.exports = async function (args, options, logger) {
     await create(networkDir, config)
 
     if (!options['noLogRotation']) {
-      await util.pm2InstallRotateLog(networkDir)
-      await util.pm2SetRotateLog(networkDir, options.logSizeMb, options.logSize)
+      await util.pm2SetupLogRotation(networkDir, config.logSize, config.logNum)
     }
     if (options['noStart'] === false) {
       start(networkDir, num, 'create', args.pm2, options)
@@ -285,8 +285,7 @@ module.exports = async function (args, options, logger) {
     inquirer.prompt(questions).then(async (answers) => {
       await create(networkDir, answers)
       if (!options['noLogRotation']) {
-        await util.pm2InstallRotateLog(networkDir)
-        await util.pm2SetRotateLog(networkDir, answers.logSize, answers.logNum)
+        await util.pm2SetupLogRotation(networkDir, answers.logSize, answers.logNum)
       }
       if (options['noStart'] === false) {
         start(networkDir, num, 'create', args.pm2, options)

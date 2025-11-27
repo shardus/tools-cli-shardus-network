@@ -28,22 +28,26 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
       if (newArchiverCount > 9) newArchiverCount = 9
 
       const existingArchiversEnv = existingArchivers.map((archiver) => `${archiver.ip}:${archiver.port}:${archiver.publicKey}`).join(',')
-      // Start new archivers on ports following existingArchivers
+      // Start new archivers on ports following existingArchivers (parallel)
+      const archiverStarts = []
       for (let i = 0; i < newArchiverCount; i++) {
-        await util.pm2Start(
-          networkDir,
-          require.resolve('@shardus/archiver', { paths: [process.cwd()] }),
-          `archive-server-${i + 1 + existingArchivers.length}`,
-          {
-            ARCHIVER_PORT: existingArchivers[0].port + existingArchivers.length + i,
-            ARCHIVER_PUBLIC_KEY: archiverKeys[existingArchivers.length + i].publicKey,
-            ARCHIVER_SECRET_KEY: archiverKeys[existingArchivers.length + i].secretKey,
-            ARCHIVER_INFO: existingArchiversEnv,
-            ARCHIVER_DB: `archiver-db-${archiverKeys[existingArchivers.length + i].port}`
-          },
-          pm2Args
+        archiverStarts.push(
+          util.pm2Start(
+            networkDir,
+            require.resolve('@shardus/archiver', { paths: [process.cwd()] }),
+            `archive-server-${i + 1 + existingArchivers.length}`,
+            {
+              ARCHIVER_PORT: existingArchivers[0].port + existingArchivers.length + i,
+              ARCHIVER_PUBLIC_KEY: archiverKeys[existingArchivers.length + i].publicKey,
+              ARCHIVER_SECRET_KEY: archiverKeys[existingArchivers.length + i].secretKey,
+              ARCHIVER_INFO: existingArchiversEnv,
+              ARCHIVER_DB: `archiver-db-${archiverKeys[existingArchivers.length + i].port}`
+            },
+            pm2Args
+          )
         )
       }
+      await Promise.all(archiverStarts)
 
       // Add the newly started archivers to network-config.json existingArchivers
       for (let i = 1; i <= newArchiverCount; i++) {
@@ -55,7 +59,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
       return
     }
 
-    // Start archiver
+    // Start archiver first (monitor needs it ready)
     if (networkConfig.startArchiver) {
       const existingArchivers = JSON.parse(networkConfig.existingArchivers)
 
@@ -74,11 +78,12 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
       )
 
       networkConfig.startArchiver = false // Prevent this code from running twice
-
-      await util.sleep(1000) // Add 1sec delay to allow archiver to be ready, so that monitor can connect it with archiver discovery
+      
+      // Small delay to allow archiver to be ready for monitor
+      await util.sleep(1000)
     }
 
-    // Start monitor
+    // Start monitor (needs archiver to be ready)
     if (networkConfig.startMonitor) {
       let existingArchivers = JSON.parse(networkConfig.existingArchivers)
       const existingArchiversEnv = existingArchivers.map((archiver) => `${archiver.ip}:${archiver.port}:${archiver.publicKey}`).join(',')
@@ -98,7 +103,7 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
       networkConfig.startMonitor = false; // Prevent this code from running twice
     }
 
-    // Start explorer
+    // Start explorer (can be parallel with nodes)
     if (networkConfig.startExplorerServer) {
       await util.pm2Start(
         networkDir,
@@ -117,14 +122,20 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
     console.log(err)
   }
 
+  // Start all validator nodes in parallel (don't wait - fire and forget for speed)
   if (type === 'create') {
+    console.log(`Starting ${nodesToStart} validator nodes in parallel...`)
     for (let i = 0; i < nodesToStart; i++) {
       if (!networkConfig.runningPorts.includes(networkConfig.lowestPort + i)) {
         if (instances[i]) {
           if (options?.inspect) {
-            await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, [`pm2--node-args="--inspect=127.0.0.1:${networkConfig.inspectPort + i}"`, ...pm2Args])
+            util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, [`pm2--node-args="--inspect=127.0.0.1:${networkConfig.inspectPort + i}"`, ...pm2Args]).catch(err => {
+              console.error(`Error starting ${path.basename(instances[i])}:`, err.message)
+            })
           } else {
-            await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+            util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args).catch(err => {
+              console.error(`Error starting ${path.basename(instances[i])}:`, err.message)
+            })
           }
           networkConfig.runningPorts.push(networkConfig.lowestPort + i)
         }
@@ -135,16 +146,23 @@ module.exports = async function (networkDir, num, type, pm2Args, options) {
   }
 
   if (type === 'start') {
+    console.log(`Starting ${num} validator nodes in parallel...`)
     for (let i = instances.length - num; i < instances.length; i++) {
       if (options?.inspect) {
-        await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, [`pm2--node-args="--inspect=127.0.0.1:${networkConfig.inspectPort + i}"`, ...pm2Args])
+        util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, [`pm2--node-args="--inspect=127.0.0.1:${networkConfig.inspectPort + i}"`, ...pm2Args]).catch(err => {
+          console.error(`Error starting ${path.basename(instances[i])}:`, err.message)
+        })
       } else {
-        await util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args)
+        util.pm2Start(networkDir, networkConfig.serverPath, path.basename(instances[i]), { BASE_DIR: instances[i] }, pm2Args).catch(err => {
+          console.error(`Error starting ${path.basename(instances[i])}:`, err.message)
+        })
       }
       let port = parseInt(instances[i].split('-').pop())
       networkConfig.runningPorts.push(port)
     }
   }
+  
+  console.log(`✓ Validator nodes starting (check with 'pm2 list')`)
 
   shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)
 

@@ -50,18 +50,20 @@ module.exports = async function (networkDir, options, args) {
                 activeArchiversCalculated = true
             }
 
+            const restartPromises = []
             for (let i = 0; i < count; i++) {
                 port = stoppedArchivers[i].port - 4000;
                 console.log("archive-server-" + (port + 1));
                 newArchiversInfo.push({ ip: stoppedArchivers[i].ip, port: stoppedArchivers[i].port, publicKey: stoppedArchivers[i].publicKey })
-                await util.pm2Restart(networkDir, `"archive-server-${port + 1}"`, {
+                restartPromises.push(util.pm2Restart(networkDir, `"archive-server-${port + 1}"`, {
                     ARCHIVER_PORT: stoppedArchivers[i].port,
                     ARCHIVER_PUBLIC_KEY: stoppedArchivers[i].publicKey,
                     ARCHIVER_SECRET_KEY: archiverKeys[port].secretKey,
                     ARCHIVER_INFO: activeArchiversEnv,
                     ARCHIVER_DB: `archiver-db-${stoppedArchivers[i].port}`,
-                });
+                }))
             }
+            await Promise.all(restartPromises)
         }
 
         if (existingArchivers.length > 0) {
@@ -77,20 +79,22 @@ module.exports = async function (networkDir, options, args) {
                 activeArchiversEnv = activeArchivers.map((archiver) => `${archiver.ip}:${archiver.port}:${archiver.publicKey}`).join(',')
                 activeArchiversCalculated = true
             }
-            // Restart archivers on ports following existingArchivers
+            // Restart archivers on ports following existingArchivers (parallel)
+            const archiverRestartPromises = []
             for (let i = 0; i < restartArchiverCount; i++) {
                 port = existingArchivers[i].port - 4000;
                 console.log("archive-server-" + (port + 1));
                 newArchiversInfo.push({ ip: existingArchivers[i].ip, port: existingArchivers[i].port, publicKey: existingArchivers[i].publicKey })
-                await util.pm2Restart(networkDir, `"archive-server-${port + 1}"`, {
+                archiverRestartPromises.push(util.pm2Restart(networkDir, `"archive-server-${port + 1}"`, {
                     ARCHIVER_PORT: existingArchivers[i].port,
                     ARCHIVER_PUBLIC_KEY: existingArchivers[i].publicKey,
                     ARCHIVER_SECRET_KEY: archiverKeys[port].secretKey,
                     ARCHIVER_INFO: activeArchiversEnv,
                     ARCHIVER_DB: `archiver-db-${existingArchivers[i].port}`,
-                });
+                }))
                 port++;
             }
+            await Promise.all(archiverRestartPromises)
         }
         activeArchivers = [...activeArchivers, ...newArchiversInfo]
         activeArchivers.sort((a, b) => a.port - b.port)
@@ -147,13 +151,16 @@ module.exports = async function (networkDir, options, args) {
         if (networkConfig.stoppedConsensors)
             stoppedConsensors = networkConfig.stoppedConsensors;
         else stoppedConsensors = [];
+        const consensorRestartPromises = []
         for (let i = 0; i < restartConsensorCount; i++) {
-            await util.pm2Restart(networkDir, `"shardus-instance-${lowestPort}"`);
+            consensorRestartPromises.push(util.pm2Restart(networkDir, `"shardus-instance-${lowestPort}"`))
             networkConfig.runningPorts.push(lowestPort);
         }
+        await Promise.all(consensorRestartPromises)
+        const portRestartPromises = []
         networkConfig.runningPorts.forEach((port) => {
             if (num > 0) {
-                util.pm2Restart(networkDir, `"shardus-instance-${port}"`);
+                portRestartPromises.push(util.pm2Restart(networkDir, `"shardus-instance-${port}"`))
                 networkConfig.runningPorts = networkConfig.runningPorts.filter(
                     (p) => p !== port
                 );
@@ -161,6 +168,10 @@ module.exports = async function (networkDir, options, args) {
             }
             num--;
         });
+        await Promise.all(portRestartPromises)
+        if (portRestartPromises.length > 0) {
+            console.log(`✓ Restarted ${portRestartPromises.length} node(s)`)
+        }
         networkConfig.stoppedConsensors = stoppedConsensors;
     }
     shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)

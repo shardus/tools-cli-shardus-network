@@ -10,7 +10,8 @@ const pm2Start = async (networkDir, script, name, env = {}, pm2Args = []) => {
   const parsedPm2Args = pm2Args.map((arg) => arg.split('pm2')[1] || arg).join(' ')
   const execaCmd = `${pm2} start ${script} --name="${name}" ${parsedPm2Args}`
   console.log('pm2Start', execaCmd)
-  await execa.command(execaCmd, { cwd: networkDir, env, stdio: [0, 1, 2] })
+  // Suppress output for cleaner logs, but still awaitable
+  await execa.command(execaCmd, { cwd: networkDir, env, stdio: 'ignore' })
 }
 
 const pm2Restart = async (networkDir, name, env = {}) => {
@@ -18,61 +19,175 @@ const pm2Restart = async (networkDir, name, env = {}) => {
   // const parsedPm2Args = pm2Args.map((arg) => arg.split('pm2')[1] || arg).join(' ')
   const execaCmd = `${pm2} restart ${name} --update-env`
   console.log('pm2Restart', execaCmd, env)
-  await execa.command(execaCmd, { cwd: networkDir, env, stdio: [0, 1, 2] })
+  // Fire and forget - don't await, suppress output for speed
+  execa.command(execaCmd, { cwd: networkDir, env, stdio: 'ignore' }).catch(err => {
+    console.error(`Error restarting ${name}:`, err.message)
+  })
 }
 
 const pm2Stop = async (networkDir, arg, env = {}) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
-  await execa.command(`${pm2} stop ${arg}`, {
+  // Don't await - fire and forget for speed, suppress output
+  execa.command(`${pm2} stop ${arg}`, {
     cwd: networkDir,
     env,
-    stdio: [0, 1, 2],
+    stdio: 'ignore',
+  }).catch(err => {
+    console.error(`Error stopping ${arg}:`, err.message)
   })
 }
 
 const pm2Kill = async (networkDir, env = {}) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
-  await execa.command(`${pm2} kill`, { cwd: networkDir, env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} kill`, { cwd: networkDir, env, stdio: 'ignore' })
 }
 
 const pm2Reset = async (arg, env = {}) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
-  await execa.command(`${pm2} reset ${arg}`, { env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} reset ${arg}`, { env, stdio: 'ignore' })
 }
 
 const pm2Del = async (arg, env = {}) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
-  await execa.command(`${pm2} del ${arg}`, { env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} del ${arg}`, { env, stdio: 'ignore' })
 }
 
 const pm2List = async (networkDir, env = {}) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
-  await execa.command(`${pm2} list`, { cwd: networkDir, env, stdio: [0, 1, 2] })
+  await execa.command(`${pm2} list`, { cwd: networkDir, env, stdio: 'inherit' })
+}
+
+const pm2CheckModuleInstalled = async (networkDir, moduleName, env = {}) => {
+  env.PM2_HOME = path.join(networkDir, '.pm2/')
+  try {
+    const result = await execa.command(`${pm2} list`, { cwd: networkDir, env })
+    return result.stdout.includes(moduleName)
+  } catch (err) {
+    return false
+  }
+}
+
+const pm2GetModuleConfig = async (networkDir, env = {}) => {
+  env.PM2_HOME = path.join(networkDir, '.pm2/')
+  try {
+    const moduleConfPath = path.join(networkDir, '.pm2', 'module_conf.json')
+    if (fs.existsSync(moduleConfPath)) {
+      return JSON.parse(fs.readFileSync(moduleConfPath, 'utf-8'))
+    }
+    return {}
+  } catch (err) {
+    return {}
+  }
 }
 
 const pm2InstallRotateLog = async (networkDir, env = {}) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
+  
+  // Check if pm2-logrotate is already installed
+  const isInstalled = await pm2CheckModuleInstalled(networkDir, 'pm2-logrotate', env)
+  
+  if (isInstalled) {
+    console.log('pm2-logrotate already installed')
+    return
+  }
+  
+  console.log('Installing pm2-logrotate...')
+  
+  // Install with output suppressed to avoid verbose restarts logs
   await execa.command(`${pm2} install pm2-logrotate`, {
     cwd: networkDir,
     env,
-    stdio: [0, 1, 2],
+    stdio: 'ignore',
   })
+  
+  console.log('✓ pm2-logrotate installed')
 }
 
 const pm2SetRotateLog = async (networkDir, maxSizeMb = 10, retain = 10, env = {}) => {
   env.PM2_HOME = path.join(networkDir, '.pm2/')
-  await execa.command(`${pm2} set pm2-logrotate:max_size ${maxSizeMb}M`, {
-    cwd: networkDir,
-    env,
-    stdio: [0, 1, 2],
-  })
-  await execa.command(`${pm2} set pm2-logrotate:retain ${retain}`, {
-    cwd: networkDir,
-    env,
-    stdio: [0, 1, 2],
-  })
-  // Displays PM2s conf variables
-  await execa.command(`${pm2} conf`, { cwd: networkDir, env, stdio: [0, 1, 2] })
+  
+  // Check current configuration to avoid unnecessary restarts
+  const currentConfig = await pm2GetModuleConfig(networkDir, env)
+  const needsUpdate = 
+    !currentConfig['pm2-logrotate'] ||
+    currentConfig['pm2-logrotate']['max_size'] !== `${maxSizeMb}M` ||
+    currentConfig['pm2-logrotate']['retain'] !== retain
+  
+  if (!needsUpdate) {
+    console.log(`pm2-logrotate already configured (max_size: ${maxSizeMb}M, retain: ${retain})`)
+    return
+  }
+  
+  console.log(`Configuring pm2-logrotate (max_size: ${maxSizeMb}M, retain: ${retain})...`)
+  
+  // Only set if configuration is different - suppress output to avoid noise
+  if (!currentConfig['pm2-logrotate'] || currentConfig['pm2-logrotate']['max_size'] !== `${maxSizeMb}M`) {
+    await execa.command(`${pm2} set pm2-logrotate:max_size ${maxSizeMb}M`, {
+      cwd: networkDir,
+      env,
+      stdio: 'ignore',
+    })
+  }
+  
+  if (!currentConfig['pm2-logrotate'] || currentConfig['pm2-logrotate']['retain'] !== retain) {
+    await execa.command(`${pm2} set pm2-logrotate:retain ${retain}`, {
+      cwd: networkDir,
+      env,
+      stdio: 'ignore',
+    })
+  }
+  
+  console.log('✓ pm2-logrotate configured')
+}
+
+const pm2SetupLogRotation = async (networkDir, maxSizeMb = 10, retain = 10, env = {}) => {
+  env.PM2_HOME = path.join(networkDir, '.pm2/')
+  
+  // Check if pm2-logrotate is already installed and configured
+  const isInstalled = await pm2CheckModuleInstalled(networkDir, 'pm2-logrotate', env)
+  const currentConfig = await pm2GetModuleConfig(networkDir, env)
+  
+  const needsConfigUpdate = 
+    !currentConfig['pm2-logrotate'] ||
+    currentConfig['pm2-logrotate']['max_size'] !== `${maxSizeMb}M` ||
+    currentConfig['pm2-logrotate']['retain'] !== retain
+  
+  // If already installed and configured correctly, skip everything
+  if (isInstalled && !needsConfigUpdate) {
+    console.log(`✓ pm2-logrotate already configured (max_size: ${maxSizeMb}M, retain: ${retain})`)
+    return
+  }
+  
+  // Install if not installed (with suppressed output)
+  if (!isInstalled) {
+    console.log('Setting up pm2-logrotate...')
+    await execa.command(`${pm2} install pm2-logrotate`, {
+      cwd: networkDir,
+      env,
+      stdio: 'ignore',
+    })
+  }
+  
+  // Configure if needed (suppress output to avoid restart noise)
+  if (needsConfigUpdate) {
+    if (!currentConfig['pm2-logrotate'] || currentConfig['pm2-logrotate']['max_size'] !== `${maxSizeMb}M`) {
+      await execa.command(`${pm2} set pm2-logrotate:max_size ${maxSizeMb}M`, {
+        cwd: networkDir,
+        env,
+        stdio: 'ignore',
+      })
+    }
+    
+    if (!currentConfig['pm2-logrotate'] || currentConfig['pm2-logrotate']['retain'] !== retain) {
+      await execa.command(`${pm2} set pm2-logrotate:retain ${retain}`, {
+        cwd: networkDir,
+        env,
+        stdio: 'ignore',
+      })
+    }
+  }
+  
+  console.log(`✓ pm2-logrotate configured (max_size: ${maxSizeMb}M, retain: ${retain})`)
 }
 
 const pm2Exec = async (networkDir, arg, env = {}) => {
@@ -159,6 +274,7 @@ module.exports = {
   pm2List,
   pm2InstallRotateLog,
   pm2SetRotateLog,
+  pm2SetupLogRotation,
   pm2Exec,
   checkNetworkFolder,
   setNetworkDirOrErr,
