@@ -2,11 +2,12 @@
 
 const prog = require('caporal')
 const register = require('../src/commands')
+const package = require('../package.json')
 
 prog
   .bin('shardus-network')
   .name('Shardus Network')
-  .version('1.0.0')
+  .version(package.version)
 
 for (const command in register) {
   register[command](prog)
