@@ -1,3 +1,12 @@
 {
-  "editor.formatOnSave": true
+  "editor.formatOnSave": false,
+  "editor.formatOnPaste": false,
+  "[javascript]": {
+    "editor.formatOnSave": false
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "never",
+    "source.fixAll.eslint": "never"
+  },
+  "standard.autoFixOnSave": false
 }
