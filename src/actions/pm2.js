@@ -4,5 +4,8 @@ const path = require('path')
 
 module.exports = function (args, options, logger) {
   const networkDir = util.setNetworkDirOrErr(options.dir)
-  pm2(networkDir, args.commands)
+  const commands = args.commands || []
+  // Force update of environment variables
+  commands.push('--update-env')
+  pm2(networkDir, commands)
 }
