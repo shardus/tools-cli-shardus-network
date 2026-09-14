@@ -11,7 +11,7 @@ const pm2Start = async (networkDir, script, name, env = {}, pm2Args = []) => {
   const execaCmd = `${pm2} start ${script} --name="${name}" ${parsedPm2Args}`
   console.log('pm2Start', execaCmd)
   // Suppress output for cleaner logs, but still awaitable
-  await execa.command(execaCmd, { cwd: networkDir, env, stdio: 'ignore' })
+  await execa.command(execaCmd, { cwd: networkDir, env, stdio: 'inherit' })
 }
 
 const pm2Restart = async (networkDir, name, env = {}) => {
@@ -20,7 +20,7 @@ const pm2Restart = async (networkDir, name, env = {}) => {
   const execaCmd = `${pm2} restart ${name} --update-env`
   console.log('pm2Restart', execaCmd, env)
   // Fire and forget - don't await, suppress output for speed
-  execa.command(execaCmd, { cwd: networkDir, env, stdio: 'ignore' }).catch(err => {
+  execa.command(execaCmd, { cwd: networkDir, env, stdio: 'inherit' }).catch(err => {
     console.error(`Error restarting ${name}:`, err.message)
   })
 }
@@ -31,7 +31,7 @@ const pm2Stop = async (networkDir, arg, env = {}) => {
   execa.command(`${pm2} stop ${arg}`, {
     cwd: networkDir,
     env,
-    stdio: 'ignore',
+    stdio: 'inherit',
   }).catch(err => {
     console.error(`Error stopping ${arg}:`, err.message)
   })
