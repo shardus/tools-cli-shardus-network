@@ -175,4 +175,8 @@ module.exports = async function (networkDir, options, args) {
         networkConfig.stoppedConsensors = stoppedConsensors;
     }
     shell.ShellString(JSON.stringify(networkConfig, null, 2)).to(`network-config.json`)
+
+    // wait 5 seconds before printing list table
+    await util.sleep(5000)
+    await util.pm2List(networkDir)
 };
