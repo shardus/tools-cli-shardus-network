@@ -174,6 +174,10 @@ module.exports = async function (networkDir, num, type, pm2Args, options = {}) {
       networkConfig.runningPorts.push(port)
     }
   }
+
+  // wait 8 seconds before printing list table
+  await util.sleep(5000)
+  await util.pm2List(networkDir)
   
   console.log(`✓ Validator nodes starting (check with 'shardus pm2 list')`)
 

@@ -11,7 +11,7 @@ const pm2Start = async (networkDir, script, name, env = {}, pm2Args = []) => {
   const execaCmd = `${pm2} start ${script} --name="${name}" ${parsedPm2Args}`
   console.log('pm2Start', execaCmd)
   // Suppress output for cleaner logs, but still awaitable
-  await execa.command(execaCmd, { cwd: networkDir, env, stdio: 'inherit' })
+  await execa.command(execaCmd, { cwd: networkDir, env, stdio: 'ignore' })
 }
 
 const pm2Restart = async (networkDir, name, env = {}) => {
